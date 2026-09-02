@@ -11,7 +11,11 @@ class DynamicGestureScorer(
     private val defaultMaxDurationMs: Long = 2_500L,
 ) : GestureScorer {
     override fun score(input: List<HandPose>, template: SignTemplate): FeedbackResult {
-        val valid = input.filter(::isValid).sortedBy { it.timestampMs }
+        val ordered = input.filter(::isValid).sortedBy { it.timestampMs }
+        val newestTimestamp = ordered.lastOrNull()?.timestampMs
+        val valid = if (newestTimestamp == null) emptyList() else {
+            ordered.filter { newestTimestamp - it.timestampMs <= defaultMaxDurationMs }
+        }
         if (valid.size < 3) return feedback(0f, false, "Maak de beweging iets langer.")
 
         val first = valid.first()
@@ -20,8 +24,6 @@ class DynamicGestureScorer(
         val motionRule = template.rules.firstOrNull { it.type == RuleType.MOTION_DIRECTION }
         val minDuration = motionRule?.minDurationMs ?: defaultMinDurationMs
         if (duration < minDuration) return feedback(0.15f, false, "Beweeg iets rustiger van links naar rechts.")
-        if (duration > defaultMaxDurationMs) return feedback(0.35f, false, "Probeer de beweging vloeiender en iets sneller.")
-
         val displacement = last.landmarks[WRIST].x - first.landmarks[WRIST].x
         val minDisplacement = motionRule?.targetValue?.let { kotlin.math.abs(it) }
             ?: motionRule?.tolerance

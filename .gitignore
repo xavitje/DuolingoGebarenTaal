@@ -1,4 +1,5 @@
 .gradle/
+.tmp/
 **/build/
 local.properties
 *.iml

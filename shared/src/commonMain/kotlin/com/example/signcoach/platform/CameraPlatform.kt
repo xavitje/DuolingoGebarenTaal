@@ -33,5 +33,5 @@ expect class PlatformCameraController() : CameraController {
 
 interface CameraPreviewHost {
     @Composable
-    fun Content(modifier: Modifier)
+    fun Content(modifier: Modifier = Modifier)
 }

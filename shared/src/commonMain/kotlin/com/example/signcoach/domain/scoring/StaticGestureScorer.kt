@@ -3,6 +3,7 @@ package com.example.signcoach.domain.scoring
 import com.example.signcoach.data.model.FeedbackResult
 import com.example.signcoach.data.model.HandPose
 import com.example.signcoach.data.model.LandmarkPoint
+import com.example.signcoach.data.model.RuleType
 import com.example.signcoach.data.model.SignTemplate
 import com.example.signcoach.domain.normalize.LandmarkNormalizer
 import kotlin.math.sqrt
@@ -12,12 +13,29 @@ class StaticGestureScorer(
     private val correctThreshold: Float = DEFAULT_CORRECT_THRESHOLD,
 ) : GestureScorer {
     override fun score(input: List<HandPose>, template: SignTemplate): FeedbackResult {
-        val actual = input.lastOrNull()?.let { LandmarkNormalizer.normalize(it) }
-        val expected = template.frames.firstOrNull()?.let { LandmarkNormalizer.normalize(it) }
-        if (actual == null || expected == null) return invalidPoseFeedback()
+        val requiredFrames = template.rules
+            .firstOrNull { it.type == RuleType.MIN_STABLE_FRAMES }
+            ?.targetValue
+            ?.toInt()
+            ?.coerceAtLeast(1)
+            ?: 1
+        if (input.size < requiredFrames) {
+            return FeedbackResult(
+                score = 0f,
+                isCorrect = false,
+                feedbackMessages = listOf("Houd de handvorm nog even stabiel."),
+            )
+        }
 
-        val meanDistance = actual.landmarks.zip(expected.landmarks)
-            .map { (first, second) -> euclideanDistance(first, second) }
+        val actualFrames = input.takeLast(requiredFrames).mapNotNull { LandmarkNormalizer.normalize(it) }
+        val expected = template.frames.firstOrNull()?.let { LandmarkNormalizer.normalize(it) }
+        if (actualFrames.size != requiredFrames || expected == null) return invalidPoseFeedback()
+
+        val meanDistance = actualFrames
+            .flatMap { actual ->
+                actual.landmarks.zip(expected.landmarks)
+                    .map { (first, second) -> euclideanDistance(first, second) }
+            }
             .average()
             .toFloat()
         val score = scoreFromDistance(meanDistance, maxDistance)

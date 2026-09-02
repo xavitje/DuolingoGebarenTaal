@@ -21,7 +21,10 @@ class AssetTemplateRepository(
             require(template.id.isNotBlank() && template.name.isNotBlank()) { "Template id/name is blank" }
             require(template.frames.isNotEmpty()) { "Template ${template.id} has no frames" }
             require(template.frames.all { it.landmarks.size == LANDMARK_COUNT }) { "Template ${template.id} must contain 21 landmarks per frame" }
-            require(template.frames.flatMap { it.landmarks }.all { it.x.isFinite() && it.y.isFinite() && it.z.isFinite() }) { "Template ${template.id} contains non-finite coordinates" }
+            require(template.frames.flatMap { it.landmarks }.all {
+                it.x.isFinite() && it.y.isFinite() && it.z.isFinite() &&
+                    it.x in 0f..1f && it.y in 0f..1f
+            }) { "Template ${template.id} contains invalid coordinates" }
             require(template.frames.zipWithNext().all { (a, b) -> a.timestampMs <= b.timestampMs }) { "Template ${template.id} timestamps are not ordered" }
 
             val dynamic = template.rules.any { it.type == RuleType.MOTION_DIRECTION }
