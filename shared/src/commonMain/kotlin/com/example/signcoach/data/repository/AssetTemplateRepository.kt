@@ -27,6 +27,38 @@ class AssetTemplateRepository(
             }) { "Template ${template.id} contains invalid coordinates" }
             require(template.frames.zipWithNext().all { (a, b) -> a.timestampMs <= b.timestampMs }) { "Template ${template.id} timestamps are not ordered" }
 
+            // Tweede hand is optioneel, maar als hij aanwezig is moet hij dezelfde vorm hebben als de eerste.
+            require(template.frames.all { frame -> frame.secondaryHandLandmarks?.size?.let { it == LANDMARK_COUNT } ?: true }) {
+                "Template ${template.id}: de tweede hand moet, indien aanwezig, 21 landmarks bevatten"
+            }
+            require(template.frames.flatMap { it.secondaryHandLandmarks.orEmpty() }.all {
+                it.x.isFinite() && it.y.isFinite() && it.z.isFinite() &&
+                    it.x in 0f..1f && it.y in 0f..1f
+            }) { "Template ${template.id} contains invalid coordinates for the secondary hand" }
+            require(template.frames.flatMap { it.faceBlendshapes }.all { it.score.isFinite() && it.score in 0f..1f && it.name.isNotBlank() }) {
+                "Template ${template.id} contains invalid face blendshape data"
+            }
+
+            // referenceVariants zijn extra geldige referentieposes voor hetzelfde (statische)
+            // gebaar en moeten aan dezelfde eisen voldoen als frames.
+            require(template.referenceVariants.all { it.landmarks.size == LANDMARK_COUNT }) {
+                "Template ${template.id}: referenceVariants moeten 21 landmarks per pose bevatten"
+            }
+            require(template.referenceVariants.flatMap { it.landmarks }.all {
+                it.x.isFinite() && it.y.isFinite() && it.z.isFinite() &&
+                    it.x in 0f..1f && it.y in 0f..1f
+            }) { "Template ${template.id} contains invalid coordinates in referenceVariants" }
+            require(template.referenceVariants.all { variant -> variant.secondaryHandLandmarks?.size?.let { it == LANDMARK_COUNT } ?: true }) {
+                "Template ${template.id}: de tweede hand van een referenceVariant moet, indien aanwezig, 21 landmarks bevatten"
+            }
+            require(template.referenceVariants.flatMap { it.secondaryHandLandmarks.orEmpty() }.all {
+                it.x.isFinite() && it.y.isFinite() && it.z.isFinite() &&
+                    it.x in 0f..1f && it.y in 0f..1f
+            }) { "Template ${template.id} contains invalid coordinates for the secondary hand in referenceVariants" }
+            require(template.referenceVariants.flatMap { it.faceBlendshapes }.all { it.score.isFinite() && it.score in 0f..1f && it.name.isNotBlank() }) {
+                "Template ${template.id} contains invalid face blendshape data in referenceVariants"
+            }
+
             val dynamic = template.rules.any { it.type == RuleType.MOTION_DIRECTION }
             require(!dynamic || template.frames.size >= 3) { "Dynamic template ${template.id} needs at least three frames" }
             template.rules.forEach { rule ->
@@ -34,6 +66,9 @@ class AssetTemplateRepository(
                 require(rule.targetValue?.isFinite() != false && rule.tolerance?.isFinite() != false) { "Rule contains non-finite values" }
                 require(rule.tolerance == null || rule.tolerance >= 0f) { "Negative tolerance" }
                 require(rule.minDurationMs == null || rule.minDurationMs >= 0L) { "Negative duration" }
+                require(rule.type != RuleType.FACE_BLENDSHAPE || !rule.blendshapeName.isNullOrBlank()) {
+                    "FACE_BLENDSHAPE rule for template ${template.id} is missing blendshapeName"
+                }
             }
         }
     }

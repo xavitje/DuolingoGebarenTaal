@@ -14,7 +14,6 @@ object CoachReducer {
         is CoachIntent.SelectTemplate -> {
             if (state.templates.any { it.id == intent.id }) {
                 state.copy(
-                    status = TrackerStatus.STOPPED,
                     selectedTemplateId = intent.id,
                     recentPoses = emptyList(),
                     feedback = null,

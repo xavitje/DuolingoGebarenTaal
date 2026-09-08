@@ -39,16 +39,18 @@ class CoachViewModel(
     private var tracker: HandTrackerBridge? = null
     private var poseJob: Job? = null
     private var statusJob: Job? = null
+    private var practiceJob: Job? = null
 
     fun dispatch(intent: CoachIntent) {
-        val wasPracticing = state.value.status == TrackerStatus.RUNNING ||
-            state.value.status == TrackerStatus.STARTING
+        println("SignCoach: Dispatching intent $intent (current status=${state.value.status})")
         _state.update { CoachReducer.reduce(it, intent) }
         when (intent) {
             CoachIntent.LoadTemplates -> loadTemplates()
             CoachIntent.StartPractice, CoachIntent.Retry -> startPractice()
             CoachIntent.StopPractice -> stopPractice()
-            is CoachIntent.SelectTemplate -> if (wasPracticing) stopPractice()
+            is CoachIntent.SelectTemplate -> {
+                println("SignCoach: Selected template ${intent.id}")
+            }
         }
     }
 
@@ -60,23 +62,31 @@ class CoachViewModel(
 
     private fun startPractice() {
         val selected = selectedTemplate() ?: return
+        println("SignCoach: startPractice called for template ${selected.id}")
         poseJob?.cancel()
         statusJob?.cancel()
-        scope.launch {
+        practiceJob?.cancel()
+        practiceJob = scope.launch {
+            try {
+            println("SignCoach: about to call cameraController.requestPermission()")
             if (!cameraController.requestPermission()) {
+                println("SignCoach: Camera permission NOT granted")
                 _state.update { CoachReducer.trackerStatusChanged(it, TrackerStatus.NO_PERMISSION) }
                 return@launch
             }
 
+            println("SignCoach: Camera permission granted, starting hand tracker...")
             val activeTracker = tracker ?: cameraController.createHandTracker().also { tracker = it }
             statusJob = launch {
                 activeTracker.status.collectLatest { status ->
+                    println("SignCoach: Tracker status changed to $status")
                     _state.update { CoachReducer.trackerStatusChanged(it, status) }
                 }
             }
             poseJob = launch {
                 activeTracker.start()
                     .catch { error ->
+                        println("SignCoach: Tracker error: ${error.message}")
                         _state.update {
                             CoachReducer.trackerStatusChanged(
                                 it,
@@ -87,27 +97,37 @@ class CoachViewModel(
                     }
                     .collect { pose ->
                         if (!pose.isValid()) return@collect
+                        val currentSelected = selectedTemplate() ?: return@collect
                         _state.update { current ->
                             val withPose = CoachReducer.poseReceived(current, pose)
-                            val scorer = if (selected.rules.any { it.type == RuleType.MOTION_DIRECTION }) {
+                            val scorer = if (currentSelected.rules.any { it.type == RuleType.MOTION_DIRECTION }) {
                                 dynamicScorer
                             } else {
                                 staticScorer
                             }
                             CoachReducer.feedbackReceived(
                                 withPose,
-                                scorer.score(withPose.recentPoses, selected),
+                                scorer.score(withPose.recentPoses, currentSelected),
                             )
                         }
                     }
+            }
+            } catch (e: Throwable) {
+                println("SignCoach: startPractice coroutine crashed: $e")
+                e.printStackTrace()
             }
         }
     }
 
     private fun stopPractice() {
+        println("SignCoach: stopPractice called")
         poseJob?.cancel()
         statusJob?.cancel()
-        scope.launch { tracker?.stop() }
+        practiceJob?.cancel()
+        scope.launch {
+            tracker?.stop()
+            _state.update { CoachReducer.trackerStatusChanged(it, TrackerStatus.STOPPED) }
+        }
     }
 
     private fun selectedTemplate() = state.value.templates.firstOrNull {
@@ -115,11 +135,12 @@ class CoachViewModel(
     }
 
     fun clear() {
+        println("SignCoach: ViewModel clear called")
         poseJob?.cancel()
         statusJob?.cancel()
+        practiceJob?.cancel()
         scope.launch {
             tracker?.stop()
-            scope.cancel()
         }
     }
 

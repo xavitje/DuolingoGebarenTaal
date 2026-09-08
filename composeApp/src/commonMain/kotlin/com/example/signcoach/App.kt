@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -19,70 +18,54 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.signcoach.data.model.SignTemplate
 import com.example.signcoach.data.model.TrackerStatus
-import com.example.signcoach.data.repository.AssetTemplateRepository
 import com.example.signcoach.domain.coach.CoachIntent
+import com.example.signcoach.navigation.AppNavigation
 import com.example.signcoach.platform.CameraPreview
-import com.example.signcoach.platform.PlatformCameraController
+import com.example.signcoach.presentation.AuthViewModel
 import com.example.signcoach.presentation.CoachViewModel
-import com.example.signcoach.resources.Res
-import org.jetbrains.compose.resources.ExperimentalResourceApi
+import com.example.signcoach.ui.theme.SignCoachTheme
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun App() {
-    MaterialTheme {
-        var viewModel by remember { mutableStateOf<CoachViewModel?>(null) }
-        var startupError by remember { mutableStateOf<String?>(null) }
-        LaunchedEffect(Unit) {
-            runCatching {
-                val json = Res.readBytes("files/templates.json").decodeToString()
-                CoachViewModel(
-                    repository = AssetTemplateRepository(json),
-                    cameraController = PlatformCameraController(),
-                )
-            }.onSuccess { created ->
-                viewModel = created
-                created.dispatch(CoachIntent.LoadTemplates)
-            }.onFailure {
-                startupError = "De lokale gebaren konden niet worden geopend."
-            }
-        }
-        DisposableEffect(viewModel) {
-            onDispose { viewModel?.clear() }
-        }
-
-        when {
-            startupError != null -> CenteredMessage(startupError!!)
-            viewModel == null -> CenteredMessage("Gebaren laden…")
-            else -> CoachScreen(viewModel!!)
-        }
+    // AuthViewModel is de enige singleton die de hele app-levenscyclus meegaat.
+    val authViewModel = remember { AuthViewModel() }
+    SignCoachTheme {
+        AppNavigation(authViewModel = authViewModel)
     }
 }
 
+/**
+ * Oefenscherm: camera + geselecteerd gebaar + scorefeedback.
+ * De Admin-knop is hier verwijderd — Admin is nu bereikbaar via Profiel-tab (alleen voor admins).
+ * onAdmin-parameter is weggehaald; onContribute blijft voor de contributie-flow.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CoachScreen(viewModel: CoachViewModel) {
+fun CoachScreen(viewModel: CoachViewModel, onContribute: () -> Unit) {
     val state by viewModel.state.collectAsState()
     val selected = state.templates.firstOrNull { it.id == state.selectedTemplateId }
-    Scaffold(topBar = { TopAppBar(title = { Text("Sign Language Coach") }) }) { padding ->
+
+    LaunchedEffect(Unit) {
+        viewModel.dispatch(CoachIntent.StartPractice)
+    }
+
+    Scaffold(topBar = { TopAppBar(title = { Text("SignCoach") }) }) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -147,6 +130,11 @@ private fun CoachScreen(viewModel: CoachViewModel) {
                     enabled = state.status == TrackerStatus.RUNNING || state.status == TrackerStatus.STARTING,
                 ) { Text("Stop") }
             }
+            OutlinedButton(onClick = onContribute, modifier = Modifier.fillMaxWidth()) {
+                Text("Draag een gebaar bij aan de database")
+            }
+            // De "Beheer"-knop is hier bewust verwijderd: Admin is nu een voorwaardelijke
+            // knop in het Profiel-scherm, zichtbaar alleen voor admins (via am_i_admin()).
             Spacer(Modifier.height(18.dp))
         }
     }
@@ -162,7 +150,7 @@ private fun GestureChip(template: SignTemplate, selected: SignTemplate?, viewMod
 }
 
 @Composable
-private fun CenteredMessage(message: String) {
+fun CenteredMessage(message: String) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(message) }
 }
 

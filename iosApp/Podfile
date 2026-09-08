@@ -1,0 +1,8 @@
+platform :ios, '15.0'
+use_frameworks!
+
+# LET OP: pas de target-naam hieronder aan als je Xcode-project een andere app-targetnaam
+# gebruikt dan 'iosApp' (de KMP-wizard default). Zie IOS_SETUP.md in de root van dit project.
+target 'iosApp' do
+  pod 'MediaPipeTasksVision', '~> 0.10.29'
+end
