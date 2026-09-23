@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "291019558840",
+    "project_id": "signcoach-e3ec1",
+    "storage_bucket": "signcoach-e3ec1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:291019558840:android:2e75e579c131eb2030094d",
+        "android_client_info": {
+          "package_name": "io.github.xavitje.signcoach"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRaD4qENury8ADwoLya9_VByz3Vt5KB6g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

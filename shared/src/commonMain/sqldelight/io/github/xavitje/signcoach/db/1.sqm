@@ -1,0 +1,19 @@
+-- Migratie van schemaversie 1 -> 2: sign_language-ondersteuning.
+-- pendingPractice krijgt gewoon een kolom (bestaande wachtrij-rijen zijn per definitie NGT,
+-- dus de DEFAULT 'ngt' is correct met terugwerkende kracht).
+ALTER TABLE pendingPractice ADD COLUMN signLanguage TEXT NOT NULL DEFAULT 'ngt';
+
+-- localPracticedToday moet zijn primary key uitbreiden (gestureId, date) -> (gestureId,
+-- signLanguage, date); SQLite staat geen ALTER van een primary key toe, dus rebuild de tabel.
+-- Dit is puur een "vandaag al geoefend"-dedupe-cache (dagelijks leeggeruimd via
+-- clearPracticedBefore), dus een volledige rebuild is hier goedkoop en veilig.
+CREATE TABLE localPracticedToday_new (
+    gestureId TEXT NOT NULL,
+    signLanguage TEXT NOT NULL DEFAULT 'ngt',
+    date TEXT NOT NULL,
+    PRIMARY KEY (gestureId, signLanguage, date)
+);
+INSERT INTO localPracticedToday_new (gestureId, signLanguage, date)
+SELECT gestureId, 'ngt', date FROM localPracticedToday;
+DROP TABLE localPracticedToday;
+ALTER TABLE localPracticedToday_new RENAME TO localPracticedToday;

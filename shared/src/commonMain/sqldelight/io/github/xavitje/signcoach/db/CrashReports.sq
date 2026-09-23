@@ -1,0 +1,33 @@
+-- Lokale wachtrij van crashrapporten (zie [io.github.xavitje.signcoach.crash.CrashReporter]). Een
+-- onverwachte crash mag NOOIT wachten op een netwerkverbinding: de globale exception handler
+-- schrijft hier synchroon een rij weg (werkt altijd, ook offline) en pas daarna probeert
+-- [io.github.xavitje.signcoach.data.repository.CrashReportRepository] dit naar Supabase te sturen.
+-- Net als pendingPractice: een rij verdwijnt pas na een bevestigd succesvol antwoord van de
+-- server, zodat er nooit een crashrapport verloren gaat door een mislukte sync-poging.
+CREATE TABLE pendingCrashReport (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    userId TEXT,
+    platform TEXT NOT NULL,
+    appVersion TEXT,
+    osVersion TEXT,
+    deviceModel TEXT,
+    errorType TEXT,
+    errorMessage TEXT,
+    stackTrace TEXT NOT NULL,
+    isFatal INTEGER NOT NULL,
+    clientCreatedAtMillis INTEGER NOT NULL
+);
+
+insertPendingCrashReport:
+INSERT INTO pendingCrashReport(
+    userId, platform, appVersion, osVersion, deviceModel, errorType, errorMessage, stackTrace, isFatal, clientCreatedAtMillis
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+selectAllPendingCrashReports:
+SELECT * FROM pendingCrashReport ORDER BY id ASC;
+
+countPendingCrashReports:
+SELECT COUNT(*) FROM pendingCrashReport;
+
+deletePendingCrashReportById:
+DELETE FROM pendingCrashReport WHERE id = ?;

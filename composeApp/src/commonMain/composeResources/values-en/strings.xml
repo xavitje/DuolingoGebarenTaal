@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App General -->
+    <string name="app_name">SignCoach</string>
+    <string name="error_unknown">An unknown error occurred.</string>
+    <string name="error_network_unavailable">No internet connection. Please check your connection.</string>
+    <string name="error_network_timeout">The server is not responding. Please try again later.</string>
+    <string name="error_unauthorized">Session expired or access denied. Please log in again.</string>
+    <string name="error_not_found">Data not found.</string>
+    <string name="error_server">Server error (%1$s): %2$s</string>
+    <string name="error_malformed_data">Unable to read data from the server.</string>
+
+    <!-- Validation Errors -->
+    <string name="error_field_empty">Please fill in all required fields.</string>
+    <string name="error_invalid_credentials">Login failed. Please check your email and password.</string>
+    <string name="error_passwords_do_not_match">Passwords do not match.</string>
+    <string name="error_password_too_short">Password must be at least 6 characters.</string>
+    <string name="error_camera_permission_denied">Camera permission is required to contribute.</string>
+    <string name="error_no_hand_detected">No hand detected during recording. Please try again with your hand clearly in view.</string>
+    <string name="error_template_load_failed">The gestures could not be loaded.</string>
+    <string name="error_tracker">Hand tracking error: %1$s</string>
+
+    <string name="login_subtitle">Learn Dutch Sign Language</string>
+    <string name="login_title">Log in</string>
+    <string name="login_email_label">Email address</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_password_hide">Hide</string>
+    <string name="login_password_show">Show</string>
+    <string name="login_forgot_password">Forgot password?</string>
+    <string name="login_button">Log in</string>
+    <string name="login_or">or</string>
+    <string name="forgot_password_title">Forgot password</string>
+    <string name="forgot_password_desc">Enter your email address and we will send a recovery link.</string>
+    <string name="forgot_password_button">Send recovery email</string>
+    <string name="forgot_password_back">Back to log in</string>
+    <string name="login_no_account">No account yet?</string>
+    <string name="login_register_button">Sign up</string>
+    <string name="login_google_button">🌐  Continue with Google</string>
+
+    <string name="register_title_main">Create account</string>
+    <string name="register_subtitle">Start your NGT learning journey</string>
+    <string name="register_title">Register</string>
+    <string name="register_password_label">Password (min. 6 characters)</string>
+    <string name="register_confirm_password_label">Confirm password</string>
+    <string name="register_button">Create account</string>
+    <string name="register_already_account">Already have an account?</string>
+    <string name="register_login_button">Login</string>
+
+    <!-- MainScreen & Tabs -->
+    <string name="tab_learn">Learn</string>
+    <string name="tab_progress">Progress</string>
+    <string name="tab_profile">Profile</string>
+
+    <!-- ProgressScreen -->
+    <string name="progress_daily_goal">Daily Goal</string>
+    <string name="progress_xp_earned">%1$d / %2$d XP</string>
+    <string name="progress_current_streak">Current Streak</string>
+    <string name="progress_days_streak">%1$d days 🔥</string>
+    <string name="progress_total_xp">Total XP</string>
+    <string name="progress_xp_today">XP today</string>
+    <string name="progress_retry">Try again</string>
+    <string name="progress_pending_sync">%1$d not synced yet — will update once you’re back online</string>
+    <string name="progress_syncing">Syncing…</string>
+    <string name="demo_watch_first">Watch how it's done first</string>
+    <string name="demo_coming_soon">Video coming soon for this gesture — you can practice already.</string>
+    <string name="demo_video_error">Couldn’t load the video — you can still practice.</string>
+    <string name="demo_start_practice">Start practicing</string>
+
+    <!-- ProfileScreen -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_settings">Settings</string>
+    <string name="profile_language">Taal / Language</string>
+    <string name="profile_language_dutch">Nederlands</string>
+    <string name="profile_language_english">English</string>
+    <string name="profile_admin_panel">Admin Panel</string>
+    <string name="profile_contribute">Contribute a gesture to the database</string>
+    <string name="profile_logout">Log out</string>
+    <string name="profile_logout_confirm_title">Log out?</string>
+    <string name="profile_logout_confirm_desc">Your progress and settings will be saved. You can log back in at any time.</string>
+    <string name="profile_cancel">Cancel</string>
+
+    <!-- Sign language selection (onboarding + settings) -->
+    <string name="onboarding_sign_language_title">Which sign language do you want to learn?</string>
+    <string name="onboarding_sign_language_subtitle">You can always change this later in your settings.</string>
+    <string name="onboarding_sign_language_continue">Continue</string>
+    <string name="profile_sign_language">Sign language</string>
+    <string name="profile_sign_language_picker_title">Choose sign language</string>
+    <string name="sign_language_ngt_name">Dutch Sign Language (NGT)</string>
+    <string name="sign_language_ngt_description">Full: alphabet and numbers</string>
+    <string name="sign_language_asl_name">American Sign Language (ASL)</string>
+    <string name="sign_language_asl_description">Basic words — alphabet coming later</string>
+    <string name="sign_language_bsl_name">British Sign Language (BSL)</string>
+    <string name="sign_language_bsl_description">Coming soon</string>
+
+    <!-- LearnScreen -->
+    <string name="learn_gestures_available">%1$d / %2$d gestures available</string>
+    <string name="learn_locked">Locked</string>
+    <string name="learn_path_start">Start</string>
+    <string name="learn_greeting_hi">Hi %1$s</string>
+    <string name="learn_greeting_hi_fallback">Hi!</string>
+    <string name="learn_greeting_subtitle">Time to practice</string>
+    <string name="learn_letter">Letter %1$s</string>
+    <string name="learn_number">Number %1$s</string>
+    <string name="learn_tap_to_practice">Tap to practice</string>
+    <string name="learn_no_recording_yet">No recording available yet</string>
+    <string name="learn_practice">Practice</string>
+    <string name="learn_cta_waiting">%1$d gestures are waiting for a recording</string>
+    <string name="learn_cta_desc">Help complete the learning path!\nRecord a gesture via the contribution flow.</string>
+    <string name="learn_cta_button">Contribute</string>
+
+    <!-- CoachScreen -->
+    <string name="coach_title">Practice</string>
+    <string name="coach_back">Back</string>
+    <string name="coach_success_title">You did it!</string>
+    <string name="coach_success_desc">Well done! Your score is saved.</string>
+    <string name="coach_xp_earned">+%1$d XP earned!</string>
+    <string name="coach_back_to_learn">Back to Learning Path</string>
+    <string name="coach_score">Score: %1$d%%</string>
+    <string name="coach_unsupported">Hand tracking is not yet available on this platform.</string>
+    <string name="coach_start">Start practice</string>
+    <string name="coach_stop">Stop</string>
+    
+    <string name="coach_status_stopped">Ready to practice</string>
+    <string name="coach_status_starting">Starting camera…</string>
+    <string name="coach_status_running">Keep your hand in frame</string>
+    <string name="coach_status_no_permission">Camera permission needed</string>
+    <string name="coach_status_unsupported">Not supported</string>
+    <string name="coach_status_error">Tracking error</string>
+    
+    <string name="coach_instr_letter_a">Make a fist and lay your thumb along the side of your fingers.</string>
+    <string name="coach_instr_letter_b">Extend four fingers up and bend your thumb over your palm.</string>
+    <string name="coach_instr_letter_l">Extend your index finger up and your thumb out to an L.</string>
+    <string name="coach_instr_swipe_right">Hold the hand shape and clearly move from left to right.</string>
+    <string name="coach_instr_default">Follow the example and keep your hand fully in frame.</string>
+
+    <!-- AdminScreen -->
+    <string name="admin_title">Admin — review contributions</string>
+    <string name="admin_login_title">Log in as admin</string>
+    <string name="admin_login_desc">Only the admin account can log in here — other users see nothing, even if they open this screen.</string>
+    <string name="admin_email">Email address</string>
+    <string name="admin_password">Password</string>
+    <string name="admin_login_btn">Log in</string>
+    <string name="admin_logging_in">Logging in…</string>
+    <string name="admin_back">Back to practice</string>
+    
+    <string name="admin_list_title">To review (%1$d)</string>
+    <string name="admin_list_refresh">Refresh</string>
+    <string name="admin_list_empty">Nothing to review right now.</string>
+    <string name="admin_list_hand">hand: %1$s</string>
+    <string name="admin_list_view">View</string>
+    
+    <string name="admin_detail_subtitle">hand: %1$s · %2$d images%3$s</string>
+    <string name="admin_detail_recorded_on"> · recorded on %1$s</string>
+    <string name="admin_detail_no_images">No review images found for this contribution.</string>
+    <string name="admin_detail_approve">Approve</string>
+    <string name="admin_detail_submitting">Submitting…</string>
+    <string name="admin_detail_reject_note">Reason for rejection (optional)</string>
+    <string name="admin_detail_reject">Reject</string>
+    <string name="admin_detail_back">Back to queue</string>
+
+    <string name="admin_crashes_btn">View crashes</string>
+    <string name="admin_crash_list_title">Crash reports (%1$d)</string>
+    <string name="admin_crash_list_refresh">Refresh</string>
+    <string name="admin_crash_list_empty">No crash reports — nice!</string>
+    <string name="admin_crash_list_item_subtitle">%1$s · %2$s</string>
+    <string name="admin_crash_fatal_badge">FATAL</string>
+    <string name="admin_crash_detail_title">Crash details</string>
+    <string name="admin_crash_detail_user">User: %1$s</string>
+    <string name="admin_crash_detail_user_unknown">User: unknown / not logged in</string>
+    <string name="admin_crash_detail_device">Device: %1$s · %2$s</string>
+    <string name="admin_crash_detail_app_version">App version: %1$s</string>
+    <string name="admin_crash_detail_time">Time: %1$s</string>
+    <string name="admin_crash_detail_stack_trace">Stack trace</string>
+    <string name="admin_crash_detail_back">Back to crash overview</string>
+    <string name="admin_back_to_samples">Back to submissions</string>
+
+    <!-- ContributionScreen -->
+    <string name="contrib_title">Contribute to the database</string>
+    
+    <string name="contrib_picker_title">Which gesture do you want to record?</string>
+    <string name="contrib_picker_desc">Every contribution is first reviewed by an admin before other users get it as a reference — so your recording never goes live directly.</string>
+    <string name="contrib_picker_alphabet">🔤 Alphabet</string>
+    <string name="contrib_picker_numbers">🔢 Numbers</string>
+    <string name="contrib_picker_other">✨ Other Gestures</string>
+    <string name="contrib_back">Back</string>
+    
+    <string name="contrib_consent_title">Consent</string>
+    <string name="contrib_consent_p1">We record a short sequence of images of your hand, along with the movement data (landmarks) that the app already uses to recognize gestures.</string>
+    <string name="contrib_consent_p2">The images are only visible to reviewers, solely to verify that the gesture was executed correctly. They are not shared with other users and are not used for anything other than this review.</string>
+    <string name="contrib_consent_p3">After approval, only the movement data (no image) is added to the shared reference database. You can ask to have your contribution removed at any time.</string>
+    <string name="contrib_consent_check">I give my consent to record and review this contribution.</string>
+    <string name="contrib_cancel">Cancel</string>
+    <string name="contrib_start">Start recording</string>
+    
+    <string name="contrib_countdown_title">Get your hand ready</string>
+    <string name="contrib_countdown_desc">Put your hand in the shape of the gesture now and hold it still in the frame. The recording will start automatically once the countdown is done — then just hold it still until the bar is full.</string>
+    <string name="contrib_countdown_go">Go!</string>
+    
+    <string name="contrib_recording_title">Recording…</string>
+    <string name="contrib_recording_desc">Recording now — hold the hand shape still until the bar below is full. Do not move or change shape while recording.</string>
+    
+    <string name="contrib_uploading">Sending contribution…</string>
+    
+    <string name="contrib_success_title">Thanks for your contribution!</string>
+    <string name="contrib_success_desc">A reviewer will check your recording shortly. Once approved, it will help other users recognize this gesture more accurately.</string>
+    <string name="contrib_success_again">Record another gesture</string>
+    <string name="contrib_success_back">Back to practice</string>
+    
+    <string name="contrib_error_title">Something went wrong</string>
+    <string name="contrib_error_unknown">Unknown error</string>
+    <string name="contrib_error_retry">Try again</string>
+
+    <!-- ProfileScreen: badges, avatar picker, password, account deletion (Fase D) -->
+    <string name="profile_badges_title">Badges</string>
+    <string name="profile_avatar_pick_title">Choose your avatar</string>
+    <string name="profile_change_password">Change password</string>
+    <string name="profile_link_google">Link Google account</string>
+    <string name="profile_google_linked">Google account linked</string>
+    <string name="profile_change_password_title">Change password</string>
+    <string name="profile_new_password">New password</string>
+    <string name="profile_confirm_password">Confirm password</string>
+    <string name="profile_save">Save</string>
+    <string name="profile_password_updated">Password updated.</string>
+    <string name="profile_delete_account">Delete account</string>
+    <string name="profile_delete_account_confirm_title">Delete account?</string>
+    <string name="profile_delete_account_confirm_desc">This permanently deletes your account and all progress. This cannot be undone.</string>
+    <string name="profile_delete_account_confirm_button">Delete permanently</string>
+
+    <!-- ProgressScreen: empty state for new users (Fase D) -->
+    <string name="progress_empty_title">You haven\'t practiced yet</string>
+    <string name="progress_empty_desc">Start your first gesture to see your streak and XP grow.</string>
+</resources>

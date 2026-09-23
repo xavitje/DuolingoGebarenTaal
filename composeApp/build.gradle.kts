@@ -5,6 +5,17 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+// Push-notificaties (Firebase Cloud Messaging): het google-services-plugin genereert de
+// FirebaseApp-configuratie uit google-services.json, maar dat bestand bestaat pas zodra de
+// gebruiker zelf een Firebase-project heeft aangemaakt (zie PLAN.md / taak "Firebase setup").
+// Zonder dit bestand faalt het plugin de build meteen, dus passen we het alleen toe als het
+// bestand er al is. FcmTokenProvider.android.kt vangt de ontbrekende configuratie zelf ook
+// netjes af, zodat push-registratie tot die tijd gewoon stilletjes niets doet.
+val googleServicesFile = file("google-services.json")
+if (googleServicesFile.exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 kotlin {
     androidTarget()
     iosX64()
@@ -39,15 +50,26 @@ kotlin {
         }
         androidMain.dependencies {
             implementation(libs.activity.compose)
+            // Firebase Cloud Messaging voor push-notificaties (zie FcmTokenProvider.android.kt /
+            // SignCoachFirebaseMessagingService.kt). De BOM lijnt alle Firebase-libversies uit;
+            // werkt ook zonder google-services.json te compileren, alleen de daadwerkelijke
+            // FirebaseApp-initialisatie faalt dan netjes at runtime (afgevangen met try/catch).
+            // Directe string-dependencies i.p.v. via de version catalog: een catalog-accessor
+            // (ook mét eigen versie, en ook via platform()) laat Gradle's dependency-notatie
+            // stuklopen binnen dit KMP sourceSets{}-blok ("Cannot convert the provided
+            // notation to an object of type Dependency: map(valueof(DependencyValueSource))") —
+            // vandaar hardcoded coördinaten hier in plaats van libs.firebase.bom / libs.firebase.messaging.ktx.
+            implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+            implementation("com.google.firebase:firebase-messaging-ktx")
         }
     }
 }
 
 android {
-    namespace = "com.example.signcoach"
+    namespace = "io.github.xavitje.signcoach"
     compileSdk = 36
     defaultConfig {
-        applicationId = "com.example.signcoach"
+        applicationId = "io.github.xavitje.signcoach"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -60,5 +82,5 @@ android {
 }
 
 compose.resources {
-    packageOfResClass = "com.example.signcoach.resources"
+    packageOfResClass = "io.github.xavitje.signcoach.resources"
 }

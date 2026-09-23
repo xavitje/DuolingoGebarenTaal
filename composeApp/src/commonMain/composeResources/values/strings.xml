@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Algemeen -->
+    <string name="app_name">SignCoach</string>
+    <string name="error_unknown">Er is een onbekende fout opgetreden.</string>
+    <string name="error_network_unavailable">Geen internetverbinding. Controleer je verbinding.</string>
+    <string name="error_network_timeout">De server reageert niet. Probeer het later opnieuw.</string>
+    <string name="error_unauthorized">Sessie verlopen of geen toegang. Log opnieuw in.</string>
+    <string name="error_not_found">Gegevens niet gevonden.</string>
+    <string name="error_server">Fout in de server (%1$s): %2$s</string>
+    <string name="error_malformed_data">Kan de gegevens van de server niet lezen.</string>
+    
+    <!-- Validatie Fouten -->
+    <string name="error_field_empty">Vul alle verplichte velden in.</string>
+    <string name="error_invalid_credentials">Inloggen mislukt. Controleer je e-mail en wachtwoord.</string>
+    <string name="error_passwords_do_not_match">Wachtwoorden komen niet overeen.</string>
+    <string name="error_password_too_short">Wachtwoord moet minimaal 6 tekens zijn.</string>
+    <string name="error_camera_permission_denied">Camera-toestemming nodig om bij te dragen.</string>
+    <string name="error_no_hand_detected">Geen hand gedetecteerd tijdens de opname. Probeer opnieuw met je hand goed in beeld.</string>
+    <string name="error_template_load_failed">De gebaren konden niet worden geladen.</string>
+    <string name="error_tracker">Fout in handtracking: %1$s</string>
+
+    <string name="login_subtitle">Leer Nederlandse Gebarentaal</string>
+    <string name="login_title">Inloggen</string>
+    <string name="login_email_label">E-mailadres</string>
+    <string name="login_password_label">Wachtwoord</string>
+    <string name="login_password_hide">Verberg</string>
+    <string name="login_password_show">Toon</string>
+    <string name="login_forgot_password">Wachtwoord vergeten?</string>
+    <string name="login_button">Inloggen</string>
+    <string name="login_or">of</string>
+    <string name="forgot_password_title">Wachtwoord vergeten</string>
+    <string name="forgot_password_desc">Vul je e-mailadres in en we sturen een herstel-link.</string>
+    <string name="forgot_password_button">Herstel-mail sturen</string>
+    <string name="forgot_password_back">Terug naar inloggen</string>
+    <string name="login_no_account">Nog geen account?</string>
+    <string name="login_register_button">Aanmelden</string>
+    <string name="login_google_button">🌐  Doorgaan met Google</string>
+
+    <string name="register_title_main">Account aanmaken</string>
+    <string name="register_subtitle">Begin je leerreis NGT</string>
+    <string name="register_title">Registreren</string>
+    <string name="register_password_label">Wachtwoord (min. 6 tekens)</string>
+    <string name="register_confirm_password_label">Bevestig wachtwoord</string>
+    <string name="register_button">Account aanmaken</string>
+    <string name="register_already_account">Al een account?</string>
+    <string name="register_login_button">Inloggen</string>
+
+    <!-- MainScreen & Tabs -->
+    <string name="tab_learn">Leren</string>
+    <string name="tab_progress">Voortgang</string>
+    <string name="tab_profile">Profiel</string>
+
+    <!-- ProgressScreen -->
+    <string name="progress_daily_goal">Dagelijks Doel</string>
+    <string name="progress_xp_earned">%1$d / %2$d XP</string>
+    <string name="progress_current_streak">Huidige Streak</string>
+    <string name="progress_days_streak">%1$d dagen 🔥</string>
+    <string name="progress_total_xp">Totaal XP</string>
+    <string name="progress_xp_today">XP vandaag</string>
+    <string name="progress_retry">Opnieuw proberen</string>
+    <string name="progress_pending_sync">%1$d niet gesynchroniseerd — wordt bijgewerkt zodra je online bent</string>
+    <string name="progress_syncing">Bezig met synchroniseren…</string>
+    <string name="demo_watch_first">Bekijk eerst hoe het moet</string>
+    <string name="demo_coming_soon">Video volgt binnenkort voor dit gebaar — je kunt alvast oefenen.</string>
+    <string name="demo_video_error">Video kon niet worden geladen — je kan alsnog gewoon oefenen.</string>
+    <string name="demo_start_practice">Start oefenen</string>
+
+    <!-- ProfileScreen -->
+    <string name="profile_title">Profiel</string>
+    <string name="profile_settings">Instellingen</string>
+    <string name="profile_language">Taal / Language</string>
+    <string name="profile_language_dutch">Nederlands</string>
+    <string name="profile_language_english">English</string>
+    <string name="profile_admin_panel">Admin Paneel</string>
+    <string name="profile_contribute">Draag een gebaar bij aan de database</string>
+    <string name="profile_logout">Uitloggen</string>
+    <string name="profile_logout_confirm_title">Uitloggen?</string>
+    <string name="profile_logout_confirm_desc">Je voortgang en instellingen worden opgeslagen. Je kunt altijd weer inloggen.</string>
+    <string name="profile_cancel">Annuleren</string>
+
+    <!-- Gebarentaalkeuze (onboarding + instellingen) -->
+    <string name="onboarding_sign_language_title">Welke gebarentaal wil je leren?</string>
+    <string name="onboarding_sign_language_subtitle">Je kunt dit later altijd wijzigen in je instellingen.</string>
+    <string name="onboarding_sign_language_continue">Doorgaan</string>
+    <string name="profile_sign_language">Gebarentaal</string>
+    <string name="profile_sign_language_picker_title">Gebarentaal kiezen</string>
+    <string name="sign_language_ngt_name">Nederlandse Gebarentaal (NGT)</string>
+    <string name="sign_language_ngt_description">Volledig: alfabet en cijfers</string>
+    <string name="sign_language_asl_name">American Sign Language (ASL)</string>
+    <string name="sign_language_asl_description">Basiswoorden — alfabet volgt later</string>
+    <string name="sign_language_bsl_name">British Sign Language (BSL)</string>
+    <string name="sign_language_bsl_description">Binnenkort beschikbaar</string>
+
+    <!-- LearnScreen -->
+    <string name="learn_gestures_available">%1$d / %2$d gebaren beschikbaar</string>
+    <string name="learn_locked">Vergrendeld</string>
+    <string name="learn_path_start">Start</string>
+    <string name="learn_greeting_hi">Hoi %1$s</string>
+    <string name="learn_greeting_hi_fallback">Hoi!</string>
+    <string name="learn_greeting_subtitle">Tijd om te oefenen</string>
+    <string name="learn_letter">Letter %1$s</string>
+    <string name="learn_number">Cijfer %1$s</string>
+    <string name="learn_tap_to_practice">Tap om te oefenen</string>
+    <string name="learn_no_recording_yet">Nog geen opname beschikbaar</string>
+    <string name="learn_practice">Oefenen</string>
+    <string name="learn_cta_waiting">%1$d gebaren wachten nog op een opname</string>
+    <string name="learn_cta_desc">Help het leerpad compleet te maken!\nNeem een gebaar op via de bijdrage-flow.</string>
+    <string name="learn_cta_button">Bijdragen</string>
+
+    <!-- CoachScreen -->
+    <string name="coach_title">Oefenen</string>
+    <string name="coach_back">Terug</string>
+    <string name="coach_success_title">Je hebt het gehaald!</string>
+    <string name="coach_success_desc">Goed gedaan! Je score is opgeslagen.</string>
+    <string name="coach_xp_earned">+%1$d XP verdiend!</string>
+    <string name="coach_back_to_learn">Terug naar Leerpad</string>
+    <string name="coach_score">Score: %1$d%%</string>
+    <string name="coach_unsupported">Handtracking is op dit platform nog niet beschikbaar.</string>
+    <string name="coach_start">Start oefenen</string>
+    <string name="coach_stop">Stop</string>
+    
+    <string name="coach_status_stopped">Klaar om te oefenen</string>
+    <string name="coach_status_starting">Camera starten…</string>
+    <string name="coach_status_running">Houd je hand in beeld</string>
+    <string name="coach_status_no_permission">Cameratoegang nodig</string>
+    <string name="coach_status_unsupported">Niet ondersteund</string>
+    <string name="coach_status_error">Trackingfout</string>
+    
+    <string name="coach_instr_letter_a">Maak een vuist en leg je duim langs de zijkant van je vingers.</string>
+    <string name="coach_instr_letter_b">Strek vier vingers omhoog en buig je duim over je handpalm.</string>
+    <string name="coach_instr_letter_l">Strek je wijsvinger omhoog en je duim opzij tot een L.</string>
+    <string name="coach_instr_swipe_right">Houd de handvorm vast en beweeg duidelijk van links naar rechts.</string>
+    <string name="coach_instr_default">Volg het voorbeeld en houd je hand volledig in beeld.</string>
+
+    <!-- AdminScreen -->
+    <string name="admin_title">Beheer — bijdragen beoordelen</string>
+    <string name="admin_login_title">Inloggen als beheerder</string>
+    <string name="admin_login_desc">Alleen het admin-account kan hier inloggen — andere gebruikers zien niets, ook niet als ze dit scherm openen.</string>
+    <string name="admin_email">E-mailadres</string>
+    <string name="admin_password">Wachtwoord</string>
+    <string name="admin_login_btn">Inloggen</string>
+    <string name="admin_logging_in">Bezig met inloggen…</string>
+    <string name="admin_back">Terug naar oefenen</string>
+    
+    <string name="admin_list_title">Te beoordelen (%1$d)</string>
+    <string name="admin_list_refresh">Ververs</string>
+    <string name="admin_list_empty">Niets te beoordelen op dit moment.</string>
+    <string name="admin_list_hand">hand: %1$s</string>
+    <string name="admin_list_view">Bekijken</string>
+    
+    <string name="admin_detail_subtitle">hand: %1$s · %2$d beelden%3$s</string>
+    <string name="admin_detail_recorded_on"> · opgenomen op %1$s</string>
+    <string name="admin_detail_no_images">Geen review-beelden gevonden voor deze bijdrage.</string>
+    <string name="admin_detail_approve">Goedkeuren</string>
+    <string name="admin_detail_submitting">Bezig…</string>
+    <string name="admin_detail_reject_note">Reden voor afkeuren (optioneel)</string>
+    <string name="admin_detail_reject">Afkeuren</string>
+    <string name="admin_detail_back">Terug naar wachtrij</string>
+
+    <string name="admin_crashes_btn">Crashes bekijken</string>
+    <string name="admin_crash_list_title">Crashrapporten (%1$d)</string>
+    <string name="admin_crash_list_refresh">Ververs</string>
+    <string name="admin_crash_list_empty">Geen crashrapporten — mooi zo!</string>
+    <string name="admin_crash_list_item_subtitle">%1$s · %2$s</string>
+    <string name="admin_crash_fatal_badge">FATAAL</string>
+    <string name="admin_crash_detail_title">Crashdetails</string>
+    <string name="admin_crash_detail_user">Gebruiker: %1$s</string>
+    <string name="admin_crash_detail_user_unknown">Gebruiker: onbekend / niet ingelogd</string>
+    <string name="admin_crash_detail_device">Toestel: %1$s · %2$s</string>
+    <string name="admin_crash_detail_app_version">App-versie: %1$s</string>
+    <string name="admin_crash_detail_time">Tijdstip: %1$s</string>
+    <string name="admin_crash_detail_stack_trace">Stack trace</string>
+    <string name="admin_crash_detail_back">Terug naar crashoverzicht</string>
+    <string name="admin_back_to_samples">Terug naar bijdragen</string>
+
+    <!-- ContributionScreen -->
+    <string name="contrib_title">Bijdragen aan de database</string>
+    
+    <string name="contrib_picker_title">Welk gebaar wil je opnemen?</string>
+    <string name="contrib_picker_desc">Elke bijdrage wordt eerst door een beoordelaar bekeken voordat andere gebruikers hem als referentie krijgen — jouw opname gaat dus nooit direct live.</string>
+    <string name="contrib_picker_alphabet">🔤 Alfabet</string>
+    <string name="contrib_picker_numbers">🔢 Cijfers</string>
+    <string name="contrib_picker_other">✨ Andere Gebaren</string>
+    <string name="contrib_back">Terug</string>
+    
+    <string name="contrib_consent_title">Toestemming</string>
+    <string name="contrib_consent_p1">We nemen een korte reeks beelden van je hand op, samen met de bewegingsdata (landmarks) die de app al gebruikt om gebaren te herkennen.</string>
+    <string name="contrib_consent_p2">De beelden zijn alleen zichtbaar voor beoordelaars, uitsluitend om te controleren of het gebaar correct is uitgevoerd. Ze worden niet gedeeld met andere gebruikers en niet gebruikt voor iets anders dan deze beoordeling.</string>
+    <string name="contrib_consent_p3">Na goedkeuring wordt alleen de bewegingsdata (geen beeld) toegevoegd aan de gedeelde referentiedatabase. Je kunt op elk moment vragen om je bijdrage te laten verwijderen.</string>
+    <string name="contrib_consent_check">Ik geef toestemming voor het opnemen en beoordelen van deze bijdrage.</string>
+    <string name="contrib_cancel">Annuleren</string>
+    <string name="contrib_start">Start opname</string>
+    
+    <string name="contrib_countdown_title">Zet je hand klaar</string>
+    <string name="contrib_countdown_desc">Zet je hand nu al in de vorm van het gebaar en houd hem stil in beeld. De opname begint vanzelf zodra het aftellen klaar is — dan even stil blijven houden tot de balk vol is.</string>
+    <string name="contrib_countdown_go">Ga!</string>
+    
+    <string name="contrib_recording_title">Opnemen…</string>
+    <string name="contrib_recording_desc">Nu opnemen — houd de handvorm stil tot de balk hieronder vol is. Niet meer bewegen of van vorm veranderen tijdens het opnemen.</string>
+    
+    <string name="contrib_uploading">Bijdrage versturen…</string>
+    
+    <string name="contrib_success_title">Bedankt voor je bijdrage!</string>
+    <string name="contrib_success_desc">Een beoordelaar bekijkt je opname binnenkort. Zodra hij is goedgekeurd, helpt hij andere gebruikers dit gebaar nauwkeuriger te herkennen.</string>
+    <string name="contrib_success_again">Nog een gebaar opnemen</string>
+    <string name="contrib_success_back">Terug naar oefenen</string>
+    
+    <string name="contrib_error_title">Er is iets misgegaan</string>
+    <string name="contrib_error_unknown">Onbekende fout</string>
+    <string name="contrib_error_retry">Opnieuw proberen</string>
+
+    <!-- ProfileScreen: badges, avatar-picker, wachtwoord, account verwijderen (Fase D) -->
+    <string name="profile_badges_title">Badges</string>
+    <string name="profile_avatar_pick_title">Kies je avatar</string>
+    <string name="profile_change_password">Wachtwoord wijzigen</string>
+    <string name="profile_link_google">Koppel Google-account</string>
+    <string name="profile_google_linked">Google-account gekoppeld</string>
+    <string name="profile_change_password_title">Wachtwoord wijzigen</string>
+    <string name="profile_new_password">Nieuw wachtwoord</string>
+    <string name="profile_confirm_password">Bevestig wachtwoord</string>
+    <string name="profile_save">Opslaan</string>
+    <string name="profile_password_updated">Wachtwoord bijgewerkt.</string>
+    <string name="profile_delete_account">Account verwijderen</string>
+    <string name="profile_delete_account_confirm_title">Account verwijderen?</string>
+    <string name="profile_delete_account_confirm_desc">Dit verwijdert je account en alle voortgang definitief. Dit kan niet ongedaan worden gemaakt.</string>
+    <string name="profile_delete_account_confirm_button">Definitief verwijderen</string>
+
+    <!-- ProgressScreen: lege staat voor nieuwe gebruikers (Fase D) -->
+    <string name="progress_empty_title">Je hebt nog niets geoefend</string>
+    <string name="progress_empty_desc">Begin met je eerste gebaar om je streak en XP te zien groeien.</string>
+</resources>

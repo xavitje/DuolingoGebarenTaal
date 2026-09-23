@@ -1,0 +1,75 @@
+-- Lokale, offline-first spiegel van het profiel (Zero Trust / offline-modus, zie PLAN.md).
+-- Dit is de "single source of truth" voor de UI: elke lezing van XP/streak komt hiervandaan,
+-- nooit rechtstreeks van het netwerk. SyncManager houdt dit bij zodra er weer verbinding is.
+-- Blijft globaal per gebruiker (niet per gebarentaal) — zie sign_language-migratie voor de
+-- productbeslissing hierachter: XP/streak/badges zijn taal-onafhankelijk, alleen content niet.
+CREATE TABLE localProfile (
+    id TEXT NOT NULL PRIMARY KEY,
+    avatarEmoji TEXT NOT NULL,
+    currentStreak INTEGER NOT NULL,
+    longestStreak INTEGER NOT NULL,
+    totalXp INTEGER NOT NULL,
+    dailyGoalXp INTEGER NOT NULL,
+    streakFreezesAvailable INTEGER NOT NULL,
+    lastPracticeDate TEXT,
+    streakFreezesResetAt TEXT,
+    todayXp INTEGER NOT NULL,
+    todayDate TEXT NOT NULL,
+    lastSyncedAtMillis INTEGER NOT NULL
+);
+
+selectProfile:
+SELECT * FROM localProfile WHERE id = ?;
+
+upsertProfile:
+INSERT OR REPLACE INTO localProfile(
+    id, avatarEmoji, currentStreak, longestStreak, totalXp, dailyGoalXp,
+    streakFreezesAvailable, lastPracticeDate, streakFreezesResetAt, todayXp, todayDate, lastSyncedAtMillis
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- Wachtrij van oefeningen die lokaal al verwerkt zijn (XP/streak direct zichtbaar in de UI) maar
+-- nog niet bevestigd zijn bij Supabase. SyncManager speelt deze in volgorde af zodra er weer
+-- verbinding is en verwijdert ze pas na een bevestigd succesvol antwoord van de server.
+-- signLanguage: welke gebarentaal er geoefend werd (een gestureId zoals "letter_a" betekent
+-- iets anders per taal), default 'ngt' voor compatibiliteit met bestaande rijen na migratie.
+CREATE TABLE pendingPractice (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    userId TEXT NOT NULL,
+    gestureId TEXT NOT NULL,
+    signLanguage TEXT NOT NULL DEFAULT 'ngt',
+    score REAL NOT NULL,
+    clientCreatedAtMillis INTEGER NOT NULL
+);
+
+insertPendingPractice:
+INSERT INTO pendingPractice(userId, gestureId, signLanguage, score, clientCreatedAtMillis)
+VALUES (?, ?, ?, ?, ?);
+
+selectPendingPracticeForUser:
+SELECT * FROM pendingPractice WHERE userId = ? ORDER BY id ASC;
+
+countPendingPracticeForUser:
+SELECT COUNT(*) FROM pendingPractice WHERE userId = ?;
+
+deletePendingPracticeById:
+DELETE FROM pendingPractice WHERE id = ?;
+
+-- Welke gebaren zijn vandaag al (lokaal) geoefend, om lokaal dezelfde "eerste keer vandaag =
+-- 15 XP, anders 2 XP"-regel toe te passen als de server (zie record_practice()-functie).
+-- signLanguage zit in de primary key zodat NGT- en ASL-varianten van bv. "letter_a" los van
+-- elkaar gededupliceerd worden.
+CREATE TABLE localPracticedToday (
+    gestureId TEXT NOT NULL,
+    signLanguage TEXT NOT NULL DEFAULT 'ngt',
+    date TEXT NOT NULL,
+    PRIMARY KEY (gestureId, signLanguage, date)
+);
+
+hasPracticedToday:
+SELECT COUNT(*) FROM localPracticedToday WHERE gestureId = ? AND signLanguage = ? AND date = ?;
+
+markPracticedToday:
+INSERT OR IGNORE INTO localPracticedToday(gestureId, signLanguage, date) VALUES (?, ?, ?);
+
+clearPracticedBefore:
+DELETE FROM localPracticedToday WHERE date < ?;

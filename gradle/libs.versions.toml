@@ -10,6 +10,11 @@ mediapipe = "0.10.29"
 ktor = "3.0.3"
 navigation = "2.9.2"
 multiplatform-settings = "1.3.0"
+browser = "1.8.0"
+media3 = "1.4.1"
+sqldelight = "2.0.2"
+googleServices = "4.4.2"
+firebaseBom = "33.7.0"
 
 [libraries]
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
@@ -30,3 +35,14 @@ ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "k
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation" }
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatform-settings" }
 multiplatform-settings-no-arg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatform-settings" }
+androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
+media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
+media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version = "0.6.1" }
+sqldelight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
+sqldelight-coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
+sqldelight-android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
+sqldelight-native-driver = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
+
