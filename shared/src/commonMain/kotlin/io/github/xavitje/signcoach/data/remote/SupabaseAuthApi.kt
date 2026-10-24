@@ -146,6 +146,21 @@ class SupabaseAuthApi(
     }
 
     /**
+     * Vraagt via RPC de rol van de ingelogde gebruiker op (`public.my_role()`, geeft alleen de
+     * eigen rol terug als tekst, bv. "student"). Faalt als de rollen-migratie nog niet is
+     * uitgevoerd — de aanroeper valt dan terug op [amIAdmin].
+     */
+    suspend fun myRole(accessToken: String): Result<String> = safeApiCall {
+        val response: HttpResponse = client.post("$baseUrl/rest/v1/rpc/my_role") {
+            header("apikey", anonKey)
+            header("Authorization", "Bearer $accessToken")
+            contentType(ContentType.Application.Json)
+            setBody("{}")
+        }
+        response.bodyAsText().trim().trim('"')
+    }
+
+    /**
      * Haalt de ingelogde gebruiker op, inclusief alle gekoppelde identiteiten (e-mail, Google,
      * ...). Gebruikt om in Instellingen te tonen of Google al gekoppeld is (zie ProfileScreen).
      */

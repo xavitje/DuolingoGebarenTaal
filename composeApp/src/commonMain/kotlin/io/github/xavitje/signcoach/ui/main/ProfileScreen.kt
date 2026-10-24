@@ -293,7 +293,9 @@ fun ProfileScreen(
                 )
             }
 
-            // Bijdragen Sectie
+            // Bijdragen-sectie: alleen voor vakmensen en admins (fase 2). Leerlingen nemen geen
+            // gebaren op voor de database — die content komt van professionals.
+            if (authState.canContribute) {
             HorizontalDivider()
             Text(
                 stringResource(Res.string.profile_section_contribute),
@@ -322,6 +324,7 @@ fun ProfileScreen(
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
                 }
+            }
             }
 
             // Admin-sectie (alleen zichtbaar voor admins)

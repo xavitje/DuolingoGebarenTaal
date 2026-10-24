@@ -53,6 +53,8 @@ data class AuthUiState(
     val userId: String? = null,
     val email: String? = null,
     val isAdmin: Boolean = false,
+    /** Rol van de gebruiker; bepaalt o.a. of "Draag een gebaar bij" zichtbaar is. */
+    val role: io.github.xavitje.signcoach.data.model.UserRole = io.github.xavitje.signcoach.data.model.UserRole.STUDENT,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val error: io.github.xavitje.signcoach.domain.AppError? = null,
@@ -66,7 +68,10 @@ data class AuthUiState(
      *  dit nog niet is opgehaald of als het ophalen mislukte (bv. geen netwerk); toont dan simpelweg
      *  geen "gekoppeld"-indicator, in plaats van iets te verzinnen. */
     val linkedProviders: Set<String> = emptySet(),
-)
+) {
+    /** Bijdragen (gebaren opnemen) alleen voor vakmensen en admins — nooit voor leerlingen. */
+    val canContribute: Boolean get() = role.canContribute
+}
 
 /**
  * Beheert de auth-staat van de app: sessie-herstel bij opstarten, inloggen (e-mail/wachtwoord
@@ -208,6 +213,7 @@ class AuthViewModel(
                             userId = session.user.id,
                             email = session.user.email,
                             isAdmin = false,
+                            role = io.github.xavitje.signcoach.data.model.UserRole.STUDENT,
                             authProvider = "email",
                         )
                     }
@@ -347,7 +353,15 @@ class AuthViewModel(
         email: String?,
         authProvider: String? = null,
     ) {
-        val isAdmin = authApi.amIAdmin(accessToken).getOrDefault(false)
+        val legacyAdmin = authApi.amIAdmin(accessToken).getOrDefault(false)
+        // Rol uit de database; zolang de rollen-migratie er niet is (of bij een netwerkfout)
+        // valt dit terug op "admin als am_i_admin() dat zegt, anders leerling" — nooit op meer
+        // rechten dan zeker is.
+        val role = authApi.myRole(accessToken).getOrNull()
+            ?.let { io.github.xavitje.signcoach.data.model.UserRole.fromCode(it) }
+            ?: if (legacyAdmin) io.github.xavitje.signcoach.data.model.UserRole.ADMIN
+               else io.github.xavitje.signcoach.data.model.UserRole.STUDENT
+        val isAdmin = legacyAdmin || role == io.github.xavitje.signcoach.data.model.UserRole.ADMIN
         // Zero Trust: dit mag nooit de login zelf blokkeren of laten falen — bij geen netwerk of
         // een fout blijft linkedProviders gewoon leeg, dan toont de UI simpelweg geen "gekoppeld"-
         // indicator in plaats van te crashen of foutief "niet gekoppeld" te tonen.
@@ -360,6 +374,7 @@ class AuthViewModel(
                 userId = userId,
                 email = email,
                 isAdmin = isAdmin,
+                role = role,
                 authProvider = authProvider ?: it.authProvider,
                 linkedProviders = linkedProviders ?: it.linkedProviders,
             )

@@ -207,6 +207,13 @@ fun AppNavigation(authViewModel: AuthViewModel) {
         }
 
         composable(Routes.CONTRIBUTE) {
+            // Extra slot op de deur: zonder bijdragerecht (vakmens/admin) direct terug. De knoppen
+            // zijn al verborgen; dit vangt een achtergebleven deeplink of oude navigatie op. De
+            // echte beveiliging is de RLS-policy op gesture_samples.
+            if (!authState.canContribute) {
+                LaunchedEffect(Unit) { navController.popBackStack() }
+                return@composable
+            }
             // Taalbewust: de picker moet de gebaren van de ACTIEVE gebarentaal tonen (bv. de
             // ASL-basiswoorden i.p.v. het NGT-alfabet), en elke ingediende bijdrage moet met de
             // juiste sign_language in de database belanden (zie ContributionViewModel) — anders

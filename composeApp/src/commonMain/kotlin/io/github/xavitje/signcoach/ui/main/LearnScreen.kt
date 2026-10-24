@@ -79,6 +79,8 @@ fun LearnScreen(
     progressViewModel: ProgressViewModel,
     onStartLesson: (gestureId: String) -> Unit,
     onContribute: () -> Unit,
+    /** Alleen vakmensen/admins zien de oproep om gebaren op te nemen (fase 2). */
+    showContribute: Boolean = false,
 ) {
     val state by viewModel.state.collectAsState()
     val progressState by progressViewModel.state.collectAsState()
@@ -178,7 +180,7 @@ fun LearnScreen(
 
             // CTA onderaan als er nog weinig templates zijn
             item {
-                ContributeCta(
+                if (showContribute) ContributeCta(
                     unlockedCount = state.units.sumOf { u -> u.gestures.count { it.hasTemplate } },
                     totalCount = state.units.sumOf { u -> u.gestures.size },
                     onContribute = onContribute,

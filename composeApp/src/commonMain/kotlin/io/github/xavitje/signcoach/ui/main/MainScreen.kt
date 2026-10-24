@@ -67,6 +67,7 @@ fun MainScreen(
     onNavigateToSignLanguagePicker: () -> Unit = {},
 ) {
     var selectedTab by remember { mutableStateOf(MainTab.LEARN) }
+    val authState by authViewModel.state.collectAsState()
 
     // LearnViewModel leeft op MainScreen-niveau zodat het leerpad bewaard blijft bij tab-wissels.
     val learnViewModel = remember { LearnViewModel() }
@@ -177,6 +178,7 @@ fun MainScreen(
                             if (gesture != null) learnViewModel.selectGesture(gesture)
                         },
                         onContribute = onNavigateToContribute,
+                        showContribute = authState.canContribute,
                     )
                     MainTab.PROGRESS -> {
                         LaunchedEffect(Unit) { progressViewModel.loadProgress() }
