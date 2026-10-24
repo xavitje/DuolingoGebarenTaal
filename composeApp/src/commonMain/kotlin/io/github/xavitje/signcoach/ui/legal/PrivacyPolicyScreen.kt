@@ -1,4 +1,7 @@
 package io.github.xavitje.signcoach.ui.legal
+import io.github.xavitje.signcoach.resources.*
+import io.github.xavitje.signcoach.resources.Res
+import org.jetbrains.compose.resources.stringResource
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,10 +43,10 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Privacybeleid") },
+                title = { Text(stringResource(Res.string.privacy_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Terug")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.coach_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Plum),

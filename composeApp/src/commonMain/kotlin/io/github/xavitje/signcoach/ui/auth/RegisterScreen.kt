@@ -1,4 +1,5 @@
 package io.github.xavitje.signcoach.ui.auth
+import org.jetbrains.compose.resources.getString
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -77,7 +79,7 @@ fun RegisterScreen(
     
     LaunchedEffect(networkError) {
         networkError?.let {
-            snackbarHostState.showSnackbar("Er is een netwerkfout opgetreden.") // We mapped this
+            snackbarHostState.showSnackbar(getString(Res.string.error_network_generic))
             viewModel.clearError()
         }
     }
@@ -198,6 +200,11 @@ fun RegisterScreen(
                             enabled = !state.isLoading && email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank(),
                             modifier = Modifier.fillMaxWidth().height(52.dp),
                             shape = RoundedCornerShape(14.dp),
+                            // Ook uitgeschakeld leesbaar (standaard: 38% tekst op 12% vlak, nauwelijks zichtbaar op plum).
+                            colors = ButtonDefaults.buttonColors(
+                                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
+                                disabledContentColor = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
+                            ),
                         ) {
                             if (state.isLoading) {
                                 CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)

@@ -21,6 +21,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Lock
@@ -228,18 +230,28 @@ fun ProfileScreen(
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = authState.email?.substringBefore("@") ?: "Gebruiker",
+                            text = authState.email?.substringBefore("@") ?: stringResource(Res.string.profile_user_fallback),
                             style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                         )
                         Text(
                             text = authState.email ?: "",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                         )
                     }
 
-                    TextButton(onClick = { showAvatarPicker = true }) {
-                        Text(stringResource(Res.string.profile_avatar_pick_title))
+                    // Compacte knop: de tekstknop "Kies je avatar" drukte de naam eerder in een
+                    // smalle kolom, waardoor naam en e-mail midden in een woord afbraken.
+                    IconButton(onClick = { showAvatarPicker = true }) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = stringResource(Res.string.profile_avatar_pick_title),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
                     }
                 }
             }
@@ -254,13 +266,14 @@ fun ProfileScreen(
                 StatCard(
                     modifier = Modifier.weight(1f),
                     icon = "🔥",
-                    label = "Streak",
-                    value = if (streakDays == 1) "1 dag" else "$streakDays dagen",
+                    label = stringResource(Res.string.profile_streak_label),
+                    value = if (streakDays == 1) stringResource(Res.string.profile_streak_one)
+                            else stringResource(Res.string.profile_streak_many, streakDays),
                 )
                 StatCard(
                     modifier = Modifier.weight(1f),
                     icon = "⭐",
-                    label = "Totaal XP",
+                    label = stringResource(Res.string.progress_total_xp),
                     value = "$totalXp XP",
                 )
             }
@@ -283,7 +296,7 @@ fun ProfileScreen(
             // Bijdragen Sectie
             HorizontalDivider()
             Text(
-                "Bijdragen",
+                stringResource(Res.string.profile_section_contribute),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -315,7 +328,7 @@ fun ProfileScreen(
             if (authState.isAdmin) {
                 HorizontalDivider()
                 Text(
-                    "Beheer",
+                    stringResource(Res.string.profile_section_admin),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -436,7 +449,7 @@ fun ProfileScreen(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        "Privacybeleid",
+                        stringResource(Res.string.privacy_title),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -521,7 +534,7 @@ fun ProfileScreen(
 
             HorizontalDivider()
             Text(
-                "Account",
+                stringResource(Res.string.profile_section_account),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

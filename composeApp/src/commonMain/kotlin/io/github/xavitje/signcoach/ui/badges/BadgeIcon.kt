@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -45,14 +48,18 @@ fun BadgeIcon(
     locked: Boolean = false,
     size: Dp = 72.dp,
 ) {
-    val glyphColor = if (locked) Plum.copy(alpha = 0.55f) else Color.White
-    val glyphSoft = if (locked) Plum.copy(alpha = 0.38f) else Color.White.copy(alpha = 0.72f)
+    // Ook vergrendelde badges moeten herkenbaar en aantrekkelijk zijn (een doel om naar toe te
+    // werken): een lila medaille met een witte glyph en een slotje, in plaats van een bijna
+    // onzichtbare grijze schijf op de donkere achtergrond.
+    val glyphColor = if (locked) Color.White.copy(alpha = 0.85f) else Color.White
+    val glyphSoft = if (locked) Color.White.copy(alpha = 0.55f) else Color.White.copy(alpha = 0.72f)
 
+    Box(modifier = modifier.size(size)) {
     Surface(
         shape = CircleShape,
-        color = Color.White,
+        color = if (locked) Color(0xFFC9BEDD) else Color.White,
         shadowElevation = if (locked) 1.5.dp else 5.dp,
-        modifier = modifier.size(size),
+        modifier = Modifier.size(size),
     ) {
         Box(
             modifier = Modifier.fillMaxSize().padding(size * 0.07f),
@@ -65,7 +72,7 @@ fun BadgeIcon(
                     .background(
                         Brush.linearGradient(
                             colors = if (locked)
-                                listOf(Color(0xFFF4F0FA), Color(0xFFCFC5E3))
+                                listOf(Color(0xFF9B8BC4), Color(0xFF5B4A8A))
                             else
                                 listOf(GoldLight, GoldDeep),
                         )
@@ -99,6 +106,18 @@ fun BadgeIcon(
                 }
             }
         }
+    }
+    if (locked) {
+        Surface(
+            shape = CircleShape,
+            color = Plum,
+            modifier = Modifier.align(Alignment.BottomEnd).size(size * 0.34f),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(Icons.Default.Lock, contentDescription = null, tint = Color.White, modifier = Modifier.size(size * 0.2f))
+            }
+        }
+    }
     }
 }
 

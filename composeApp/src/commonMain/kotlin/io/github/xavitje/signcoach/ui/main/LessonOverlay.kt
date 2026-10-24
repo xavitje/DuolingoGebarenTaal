@@ -56,7 +56,13 @@ fun LessonOverlay(
                 onClose = onBack,
             )
             gesture.hasTemplate -> if (coachViewModel != null) {
-                CoachScreen(viewModel = coachViewModel, onBack = onBack)
+                CoachScreen(
+                    viewModel = coachViewModel,
+                    onBack = onBack,
+                    onNext = if (learnViewModel.hasNextLesson(gesture)) {
+                        { learnViewModel.openNextLesson(gesture) }
+                    } else null,
+                )
             } else {
                 // Het CoachViewModel wordt in MainScreen net na de selectie aangemaakt.
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -75,6 +81,9 @@ fun LessonOverlay(
                 },
                 onWatchAgain = { showingDemo = true },
                 onClose = onBack,
+                onNext = if (learnViewModel.hasNextLesson(gesture)) {
+                    { learnViewModel.openNextLesson(gesture) }
+                } else null,
             )
         }
     }

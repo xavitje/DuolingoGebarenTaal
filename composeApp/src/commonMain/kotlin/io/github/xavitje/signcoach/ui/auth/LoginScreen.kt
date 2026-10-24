@@ -1,4 +1,5 @@
 package io.github.xavitje.signcoach.ui.auth
+import org.jetbrains.compose.resources.getString
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -87,7 +88,7 @@ fun LoginScreen(
     
     LaunchedEffect(networkError) {
         networkError?.let {
-            snackbarHostState.showSnackbar("Er is een netwerkfout opgetreden.") // Temporary hardcoded string for snackbar to avoid suspend function inside composable effect... Wait, we can map it.
+            snackbarHostState.showSnackbar(getString(Res.string.error_network_generic))
             viewModel.clearError()
         }
     }
@@ -201,6 +202,11 @@ fun LoginScreen(
                                 enabled = !state.isLoading && email.isNotBlank() && password.isNotBlank(),
                                 modifier = Modifier.fillMaxWidth().height(52.dp),
                                 shape = RoundedCornerShape(14.dp),
+                                // Ook uitgeschakeld leesbaar (standaard: 38% tekst op 12% vlak, nauwelijks zichtbaar op plum).
+                                colors = ButtonDefaults.buttonColors(
+                                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
+                                    disabledContentColor = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
+                                ),
                             ) {
                                 if (state.isLoading) {
                                     CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
@@ -254,6 +260,11 @@ fun LoginScreen(
                                 enabled = !state.isLoading && forgotEmail.isNotBlank(),
                                 modifier = Modifier.fillMaxWidth().height(52.dp),
                                 shape = RoundedCornerShape(14.dp),
+                                // Ook uitgeschakeld leesbaar (standaard: 38% tekst op 12% vlak, nauwelijks zichtbaar op plum).
+                                colors = ButtonDefaults.buttonColors(
+                                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
+                                    disabledContentColor = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
+                                ),
                             ) { Text(stringResource(Res.string.forgot_password_button)) }
                             TextButton(onClick = { showForgotPassword = false; viewModel.clearError() }) { Text(stringResource(Res.string.forgot_password_back)) }
                         }

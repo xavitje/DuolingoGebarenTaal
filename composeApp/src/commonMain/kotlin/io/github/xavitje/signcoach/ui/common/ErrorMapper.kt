@@ -28,8 +28,8 @@ fun AppError.toLocalizedString(): String {
         is AppError.NoHandDetected -> stringResource(Res.string.error_no_hand_detected)
         is AppError.TemplateLoadFailed -> stringResource(Res.string.error_template_load_failed)
         is AppError.TrackerError -> stringResource(Res.string.error_tracker, this.detail ?: "Unknown")
-        is AppError.NoGestureSelected -> "Kies eerst een gebaar." // TODO: add to strings.xml later if time permits
-        is AppError.GestureNotAvailable -> "Dit gebaar is niet beschikbaar." // TODO: add to strings.xml later if time permits
+        is AppError.NoGestureSelected -> stringResource(Res.string.error_no_gesture_selected)
+        is AppError.GestureNotAvailable -> stringResource(Res.string.error_gesture_not_available)
 
         is AppError.Unknown -> this.cause.message ?: stringResource(Res.string.error_unknown)
     }

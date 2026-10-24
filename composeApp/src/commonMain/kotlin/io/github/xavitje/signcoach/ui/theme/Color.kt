@@ -97,7 +97,19 @@ val DarkColorScheme = darkColorScheme(
     onSurface          = Color(0xFFF5F1FF),
     surfaceVariant     = Color(0xFF2A2246),
     onSurfaceVariant   = Color(0xFFB6AAD4),
-    outline            = Color(0xFF382C56),
+    // Zonder deze surfaceContainer-tinten vallen Cards, Surfaces met tonalElevation en dialogen
+    // terug op Material's standaard-grijs (de grijze kaarten op het Profiel-scherm).
+    surfaceContainerLowest  = PlumDeep,
+    surfaceContainerLow     = Color(0xFF231C40),
+    surfaceContainer        = Color(0xFF2A2246),
+    surfaceContainerHigh    = Plum,
+    surfaceContainerHighest = Color(0xFF362B5E),
+    surfaceBright           = Color(0xFF3D3168),
+    surfaceDim              = PlumDeep,
+    // Licht genoeg om invoervelden en scheidingslijnen zichtbaar te maken op plum (was bijna
+    // onzichtbaar: 0xFF382C56).
+    outline            = Color(0xFF8E80B5),
+    outlineVariant     = Color(0xFF4A3D6E),
     error              = Color(0xFFFFB4AB),
     onError            = Color(0xFF690005),
 )

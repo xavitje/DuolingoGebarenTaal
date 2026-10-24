@@ -23,4 +23,11 @@ data class CoachUiState(
     /** Aantal XP verdiend met de zojuist afgeronde oefening — voor de "+X XP"-melding op het
      * successcherm. Null zolang er nog geen (nieuwe) oefening is afgerond. */
     val earnedXp: Int? = null,
+    /** Hoe vaak het gebaar in deze les al goed is uitgevoerd. Een les is gehaald na
+     * [repsRequired] keer: één keer goed is geluk, drie keer is oefening. */
+    val repsDone: Int = 0,
+    val repsRequired: Int = 3,
+    /** Net een herhaling gehaald: wacht tot de leerling de hand laat zakken (score daalt)
+     * voordat de volgende herhaling telt — anders telt één lange houding meerdere keren. */
+    val waitingForRelease: Boolean = false,
 )

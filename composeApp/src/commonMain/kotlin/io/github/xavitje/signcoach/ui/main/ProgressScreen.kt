@@ -1,5 +1,14 @@
 package io.github.xavitje.signcoach.ui.main
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import io.github.xavitje.signcoach.ui.badges.BadgesSection
+import io.github.xavitje.signcoach.ui.theme.Clover
+import io.github.xavitje.signcoach.ui.theme.Coral
+import io.github.xavitje.signcoach.ui.theme.Gold
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,7 +56,7 @@ fun ProgressScreen(viewModel: ProgressViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Voortgang") },
+                title = { Text(stringResource(Res.string.tab_progress)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = io.github.xavitje.signcoach.ui.theme.Plum,
                 ),
@@ -86,18 +95,18 @@ fun ProgressScreen(viewModel: ProgressViewModel) {
             } else if (state.profile != null) {
                 val profile = state.profile!!
                 val todayXp = state.todayXp
-                val progress = (todayXp.toFloat()) / profile.dailyGoalXp.coerceAtLeast(1)
-                val streak = profile.currentStreak
+                val goal = profile.dailyGoalXp.coerceAtLeast(1)
+                val progress = (todayXp.toFloat() / goal).coerceIn(0f, 1f)
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     // Zero Trust / offline-first: laat expliciet zien wanneer de getoonde
-                    // cijfers nog lokaal zijn en nog niet bevestigd zijn door de server, in
-                    // plaats van stilzwijgend te doen alsof alles al gesynchroniseerd is.
+                    // cijfers nog lokaal zijn en nog niet bevestigd zijn door de server.
                     if (state.isSyncing) {
                         Text(
                             stringResource(Res.string.progress_syncing),
@@ -113,82 +122,126 @@ fun ProgressScreen(viewModel: ProgressViewModel) {
                         )
                     }
 
-                    // Daily Goal (XP Ring)
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(24.dp).fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                    // Dagdoel: ring + wat er nog nodig is, zodat een kind weet waar het staat.
+                    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)) {
+                        Row(
+                            modifier = Modifier.padding(20.dp).fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(20.dp),
                         ) {
-                            Text(stringResource(Res.string.progress_daily_goal), style = MaterialTheme.typography.titleMedium)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(120.dp)) {
+                            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(104.dp)) {
                                 CircularProgressIndicator(
                                     progress = { progress },
                                     modifier = Modifier.fillMaxSize(),
-                                    strokeWidth = 8.dp,
-                                    color = if (progress >= 1f) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                                    strokeWidth = 10.dp,
+                                    color = if (progress >= 1f) Clover else Gold,
+                                    trackColor = Color.White.copy(alpha = 0.12f),
+                                    strokeCap = StrokeCap.Round,
+                                    gapSize = 0.dp,
                                 )
                                 Text(
                                     stringResource(Res.string.progress_xp_earned, todayXp, profile.dailyGoalXp),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                            }
+                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text(
+                                    stringResource(Res.string.progress_daily_goal),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Text(
+                                    if (todayXp >= goal) stringResource(Res.string.progress_goal_done)
+                                    else stringResource(Res.string.progress_goal_remaining, goal - todayXp),
                                     style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Bold
+                                    color = if (todayXp >= goal) Clover else MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }
                     }
 
-                    // Streak & Stats Row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
-                        // Streak Card
-                        Card(
+                        StatTile(
                             modifier = Modifier.weight(1f),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-                        ) {
-                            Column(
+                            emoji = "\uD83D\uDD25",
+                            value = stringResource(Res.string.progress_days_streak, profile.currentStreak),
+                            label = stringResource(Res.string.progress_current_streak),
+                            valueColor = Coral,
+                        )
+                        StatTile(
+                            modifier = Modifier.weight(1f),
+                            emoji = "\u2B50",
+                            value = "${profile.totalXp}",
+                            label = stringResource(Res.string.progress_total_xp),
+                            valueColor = Gold,
+                        )
+                    }
+
+                    // Reeks-bescherming uitgelegd in plaats van een los ijsblokje met een cijfer.
+                    if (profile.streakFreezesAvailable > 0) {
+                        Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)) {
+                            Row(
                                 modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(14.dp),
                             ) {
-                                Text("🔥", style = MaterialTheme.typography.displaySmall)
-                                Text(
-                                    stringResource(Res.string.progress_days_streak, streak),
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(stringResource(Res.string.progress_current_streak), style = MaterialTheme.typography.labelMedium)
-                                if (profile.streakFreezesAvailable > 0) {
+                                Text("\uD83E\uDDCA", style = MaterialTheme.typography.headlineMedium)
+                                Column {
                                     Text(
-                                        "🧊 ${profile.streakFreezesAvailable}",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        stringResource(Res.string.progress_freeze_title, profile.streakFreezesAvailable),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                    Text(
+                                        stringResource(Res.string.progress_freeze_desc),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
                             }
                         }
+                    }
 
-                        // XP Vandaag Card — toont de XP die vandaag behaald is (niet de all-time
-                        // total, die staat op het Profiel-tabblad).
-                        Card(
-                            modifier = Modifier.weight(1f),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text("⚡", style = MaterialTheme.typography.displaySmall)
-                                Text("$todayXp", style = MaterialTheme.typography.headlineMedium)
-                                Text(stringResource(Res.string.progress_xp_today), style = MaterialTheme.typography.bodyMedium)
+                    if (state.allBadges.isNotEmpty()) {
+                        Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    stringResource(Res.string.progress_badges_title),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                )
+                                Spacer(Modifier.height(12.dp))
+                                BadgesSection(badges = state.allBadges, earnedBadgeIds = state.earnedBadgeIds)
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun StatTile(
+    modifier: Modifier,
+    emoji: String,
+    value: String,
+    label: String,
+    valueColor: Color,
+) {
+    Card(modifier = modifier, shape = RoundedCornerShape(20.dp)) {
+        Column(
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(emoji, style = MaterialTheme.typography.headlineMedium)
+            Text(value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = valueColor)
+            Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
         }
     }
 }

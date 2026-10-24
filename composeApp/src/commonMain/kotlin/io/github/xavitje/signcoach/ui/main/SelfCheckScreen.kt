@@ -54,6 +54,7 @@ fun SelfCheckScreen(
     onDone: () -> Unit,
     onWatchAgain: () -> Unit,
     onClose: () -> Unit,
+    onNext: (() -> Unit)? = null,
 ) {
     if (completed) {
         Column(
@@ -79,12 +80,29 @@ fun SelfCheckScreen(
                 }
             }
             Spacer(Modifier.height(32.dp))
-            Button(
-                onClick = onClose,
-                modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(50),
-                colors = ButtonDefaults.buttonColors(containerColor = Coral, contentColor = Color.White),
-            ) { Text(stringResource(Res.string.coach_back_to_learn), fontWeight = FontWeight.Bold) }
+            if (onNext != null) {
+                Button(
+                    onClick = onNext,
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(50),
+                    colors = ButtonDefaults.buttonColors(containerColor = Coral, contentColor = Color.White),
+                ) { Text(stringResource(Res.string.coach_next), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
+                Spacer(Modifier.height(10.dp))
+                OutlinedButton(
+                    onClick = onClose,
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(50),
+                    border = BorderStroke(1.5.dp, Plum.copy(alpha = 0.3f)),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Plum),
+                ) { Text(stringResource(Res.string.coach_back_to_learn)) }
+            } else {
+                Button(
+                    onClick = onClose,
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(50),
+                    colors = ButtonDefaults.buttonColors(containerColor = Coral, contentColor = Color.White),
+                ) { Text(stringResource(Res.string.coach_back_to_learn), fontWeight = FontWeight.Bold) }
+            }
         }
         return
     }

@@ -20,6 +20,8 @@ object CoachReducer {
                     error = null,
                     isCompleted = false,
                     earnedXp = null,
+                    repsDone = 0,
+                    waitingForRelease = false,
                 )
             } else {
                 state.copy(error = io.github.xavitje.signcoach.domain.AppError.GestureNotAvailable)
@@ -36,6 +38,8 @@ object CoachReducer {
                     error = null,
                     isCompleted = false,
                     earnedXp = null,
+                    repsDone = 0,
+                    waitingForRelease = false,
                 )
             }
         }
@@ -50,11 +54,15 @@ object CoachReducer {
             error = if (state.selectedTemplateId == null) io.github.xavitje.signcoach.domain.AppError.NoGestureSelected else null,
             isCompleted = false,
             earnedXp = null,
+            repsDone = 0,
+            waitingForRelease = false,
         )
         is CoachIntent.CompletePractice -> state.copy(
             status = TrackerStatus.STOPPED, // We stop the tracker when practice is completed
             error = null,
             isCompleted = true,
+            repsDone = state.repsRequired,
+            waitingForRelease = false,
         )
     }
 

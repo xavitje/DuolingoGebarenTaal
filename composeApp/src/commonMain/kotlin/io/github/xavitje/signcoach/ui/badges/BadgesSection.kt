@@ -1,5 +1,8 @@
 package io.github.xavitje.signcoach.ui.badges
 
+import org.jetbrains.compose.resources.stringResource
+import io.github.xavitje.signcoach.resources.Res
+import io.github.xavitje.signcoach.resources.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -50,7 +53,7 @@ fun BadgesSection(
                 ) {
                     BadgeIcon(iconKey = badge.iconKey, locked = !earned, size = 64.dp)
                     Text(
-                        text = badge.name,
+                        text = badgeDisplayName(badge),
                         style = MaterialTheme.typography.labelSmall,
                         textAlign = TextAlign.Center,
                         maxLines = 2,
@@ -60,4 +63,19 @@ fun BadgesSection(
             }
         }
     }
+}
+
+/** Badge-naam in de taal van de app. De server levert de naam in het Nederlands; voor bekende
+ * badges (op icon_key) gebruiken we de lokale vertaling, anders de servernaam. */
+@Composable
+fun badgeDisplayName(badge: BadgeApi.Badge): String = when (badge.iconKey) {
+    "eerste_stap" -> stringResource(Res.string.badge_eerste_stap)
+    "streak_7" -> stringResource(Res.string.badge_streak_7)
+    "streak_30" -> stringResource(Res.string.badge_streak_30)
+    "alfabet_compleet" -> stringResource(Res.string.badge_alfabet_compleet)
+    "cijfers_compleet" -> stringResource(Res.string.badge_cijfers_compleet)
+    "vroege_vogel" -> stringResource(Res.string.badge_vroege_vogel)
+    "perfecte_les" -> stringResource(Res.string.badge_perfecte_les)
+    "bijdrager" -> stringResource(Res.string.badge_bijdrager)
+    else -> badge.name
 }

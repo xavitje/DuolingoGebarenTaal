@@ -37,6 +37,11 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.xavitje.signcoach.data.model.CurriculumGesture
@@ -113,7 +118,27 @@ fun LearnScreen(
             return@Scaffold
         }
 
+        // Scroll bij het openen naar de les die nu aan de beurt is, zodat een kind die niet
+        // eerst onder 20 gehaalde letters hoeft te zoeken. Eén keer per volgende les.
+        val listState = rememberLazyListState()
+        val density = LocalDensity.current
+        LaunchedEffect(currentGestureId) {
+            val nextId = currentGestureId ?: return@LaunchedEffect
+            var itemIndex = 1 // item 0 = begroeting
+            for (unit in state.units) {
+                val nodeIndex = unit.gestures.indexOfFirst { it.id == nextId }
+                if (nodeIndex >= 0) {
+                    if (nodeIndex < 2) return@LaunchedEffect // staat al in beeld
+                    val offsetPx = with(density) { (PATH_NODE_SPACING * (nodeIndex - 1)).roundToPx() }
+                    listState.animateScrollToItem(itemIndex + 1, offsetPx)
+                    return@LaunchedEffect
+                }
+                itemIndex += 3 // header, pad, spacer
+            }
+        }
+
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize().padding(padding),
             verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
@@ -140,9 +165,9 @@ fun LearnScreen(
                                     // Verwijs naar de les die eerst gehaald moet worden: de
                                     // laatste open les vóór deze (zelfde nummering als op het pad).
                                     val blocker = unit.gestures.subList(0, index)
-                                        .indexOfLast { it.status == LessonStatus.AVAILABLE }
-                                    val lessonNumber = (if (blocker >= 0) blocker else 0) + 1
-                                    showMessage { getString(Res.string.learn_locked_toast, lessonNumber) }
+                                        .lastOrNull { it.status == LessonStatus.AVAILABLE }
+                                        ?: unit.gestures.first()
+                                    showMessage { getString(Res.string.learn_locked_toast, blocker.name) }
                                 }
                             }
                         },
@@ -217,9 +242,11 @@ private fun StatPill(emoji: String, value: String) {
 
 @Composable
 private fun UnitHeader(unit: CurriculumUnit) {
-    val unlockedCount = unit.gestures.count { it.hasTemplate }
+    // Telt wat de leerling GEHAALD heeft (voorheen: hoeveel gebaren een template hadden — dat
+    // zegt een kind niets).
+    val completedCount = unit.gestures.count { it.status == LessonStatus.COMPLETED }
     val total = unit.gestures.size
-    val progress = if (total > 0) unlockedCount.toFloat() / total else 0f
+    val progress = if (total > 0) completedCount.toFloat() / total else 0f
 
     Column(
         modifier = Modifier
@@ -237,13 +264,13 @@ private fun UnitHeader(unit: CurriculumUnit) {
             }
             Column {
                 Text(
-                    unit.title,
+                    unitTitle(unit),
                     style = MaterialTheme.typography.titleLarge,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
-                    stringResource(Res.string.learn_gestures_available, unlockedCount, total),
+                    stringResource(Res.string.learn_unit_progress, completedCount, total),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White.copy(alpha = 0.65f),
                 )
@@ -258,11 +285,24 @@ private fun UnitHeader(unit: CurriculumUnit) {
                 .clip(RoundedCornerShape(50)),
             color = Gold,
             trackColor = Color.White.copy(alpha = 0.14f),
+            gapSize = 0.dp,
+            drawStopIndicator = {},
         )
     }
 }
 
+/** Unitnaam in de taal van de app; onbekende units vallen terug op de titel uit de data. */
+@Composable
+private fun unitTitle(unit: CurriculumUnit): String = when (unit.id) {
+    "alphabet" -> stringResource(Res.string.unit_alphabet)
+    "numbers" -> stringResource(Res.string.unit_numbers)
+    "core_words" -> stringResource(Res.string.unit_core_words)
+    else -> unit.title
+}
+
 // ─── Slingerend leerpad ────────────────────────────────────────────────────
+
+private val PATH_NODE_SPACING = 118.dp
 
 private fun pathXFraction(index: Int): Float =
     (0.5f + 0.26f * sin(index * 1.15f)).coerceIn(0.16f, 0.84f)
@@ -275,7 +315,7 @@ private fun WindingUnitPath(
 ) {
     if (gestures.isEmpty()) return
 
-    val nodeSpacing = 118.dp
+    val nodeSpacing = PATH_NODE_SPACING
     val topPadding = 32.dp
     val pathHeight = nodeSpacing * gestures.size + topPadding
 
@@ -312,7 +352,7 @@ private fun WindingUnitPath(
             }
         }
 
-        val footprint = 84.dp
+        val footprint = 96.dp
         gestures.forEachIndexed { i, gesture ->
             val xDp = maxWidth * pathXFraction(i) - footprint / 2
             val yDp = topPadding + nodeSpacing * (i + 0.5f) - footprint / 2
@@ -321,9 +361,9 @@ private fun WindingUnitPath(
                 contentAlignment = Alignment.Center,
             ) {
                 PathNodeBadge(
+                    label = gesture.name,
                     status = gesture.status,
                     current = gesture.id == currentGestureId,
-                    index = i,
                     onClick = { onClick(i) },
                 )
             }
@@ -332,10 +372,23 @@ private fun WindingUnitPath(
 }
 
 @Composable
-private fun PathNodeBadge(status: LessonStatus, current: Boolean, index: Int, onClick: () -> Unit) {
-    val locked = status == LessonStatus.LOCKED || status == LessonStatus.COMING_SOON
-    val rimSize = if (current) 68.dp else 54.dp
-    val ballSize = if (current) 54.dp else 42.dp
+private fun PathNodeBadge(label: String, status: LessonStatus, current: Boolean, onClick: () -> Unit) {
+    val dim = status == LessonStatus.LOCKED || status == LessonStatus.COMING_SOON
+    val rimSize = if (current) 76.dp else 62.dp
+    val ballSize = if (current) 62.dp else 50.dp
+    // Een letter of cijfer staat groot op de node zelf ("A", "7") — een kind tikt op de letter
+    // die het wil leren in plaats van op een nummer. Woorden (ASL) passen niet in de bol: die
+    // krijgen een icoon in de bol en hun naam onder de node.
+    val shortLabel = label.length <= 2
+
+    val statusText = stringResource(
+        when (status) {
+            LessonStatus.COMPLETED -> Res.string.learn_completed
+            LessonStatus.AVAILABLE -> Res.string.learn_practice
+            LessonStatus.LOCKED -> Res.string.learn_locked
+            LessonStatus.COMING_SOON -> Res.string.learn_coming_soon
+        }
+    )
 
     val infiniteTransition = rememberInfiniteTransition(label = "path-pulse")
     val pulseScale by infiniteTransition.animateFloat(
@@ -384,11 +437,16 @@ private fun PathNodeBadge(status: LessonStatus, current: Boolean, index: Int, on
             }
         }
 
+        // De hele node is tikbaar, ook op slot: dan volgt een uitleg-melding in plaats van
+        // stilte (een kind denkt anders dat de app kapot is).
         Surface(
+            onClick = onClick,
             shape = CircleShape,
             color = Color.White,
             shadowElevation = 6.dp,
-            modifier = Modifier.size(rimSize),
+            modifier = Modifier
+                .size(rimSize)
+                .semantics(mergeDescendants = true) { contentDescription = "$label, $statusText" },
         ) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Box(
@@ -404,10 +462,7 @@ private fun PathNodeBadge(status: LessonStatus, current: Boolean, index: Int, on
                                     LessonStatus.COMING_SOON -> listOf(Color(0xFFE9E4F1), Color(0xFFB9AED0))
                                 },
                             )
-                        )
-                        // Ook vergrendelde nodes zijn tikbaar: dan volgt een uitleg-melding
-                        // in plaats van stilte (een kind denkt anders dat de app kapot is).
-                        .clickable(onClick = onClick),
+                        ),
                     contentAlignment = Alignment.Center,
                 ) {
                     // Glans linksboven — suggereert een bolle, glazige badge.
@@ -419,35 +474,61 @@ private fun PathNodeBadge(status: LessonStatus, current: Boolean, index: Int, on
                             .clip(CircleShape)
                             .background(Color.White.copy(alpha = 0.55f)),
                     )
-                    Icon(
-                        imageVector = when (status) {
-                            LessonStatus.COMPLETED -> Icons.Default.Check
-                            LessonStatus.AVAILABLE -> Icons.Default.PlayArrow
-                            LessonStatus.LOCKED -> Icons.Default.Lock
-                            LessonStatus.COMING_SOON -> Icons.Default.Schedule
-                        },
-                        contentDescription = stringResource(
-                            when (status) {
-                                LessonStatus.COMPLETED -> Res.string.learn_completed
-                                LessonStatus.AVAILABLE -> Res.string.learn_practice
-                                LessonStatus.LOCKED -> Res.string.learn_locked
-                                LessonStatus.COMING_SOON -> Res.string.learn_coming_soon
-                            }
-                        ),
-                        tint = if (locked) Plum.copy(alpha = 0.55f) else Color.White,
-                        modifier = Modifier.size(if (current) 26.dp else 20.dp),
-                    )
+                    if (shortLabel) {
+                        Text(
+                            label,
+                            fontSize = if (current) 28.sp else 23.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = if (dim) Plum.copy(alpha = 0.6f) else Color.White,
+                        )
+                    } else {
+                        Icon(
+                            imageVector = statusIcon(status),
+                            contentDescription = null,
+                            tint = if (dim) Plum.copy(alpha = 0.55f) else Color.White,
+                            modifier = Modifier.size(if (current) 28.dp else 22.dp),
+                        )
+                    }
                 }
             }
         }
 
-        Text(
-            (index + 1).toString(),
-            modifier = Modifier.offset(y = rimSize / 2 + 18.dp),
-            style = MaterialTheme.typography.labelSmall,
-            color = Color.White.copy(alpha = 0.55f),
-        )
+        // Klein statuslabel rechtsboven (vinkje / slot / klok) als de bol een letter toont.
+        if (shortLabel && status != LessonStatus.AVAILABLE) {
+            Surface(
+                shape = CircleShape,
+                color = when (status) {
+                    LessonStatus.COMPLETED -> Clover
+                    else -> Plum
+                },
+                border = androidx.compose.foundation.BorderStroke(2.dp, Color.White),
+                modifier = Modifier
+                    .offset(x = rimSize * 0.36f, y = -rimSize * 0.36f)
+                    .size(24.dp),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(statusIcon(status), contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+                }
+            }
+        }
+
+        if (!shortLabel) {
+            Text(
+                label,
+                modifier = Modifier.offset(y = rimSize / 2 + 20.dp),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White.copy(alpha = if (dim) 0.5f else 0.85f),
+            )
+        }
     }
+}
+
+private fun statusIcon(status: LessonStatus) = when (status) {
+    LessonStatus.COMPLETED -> Icons.Default.Check
+    LessonStatus.AVAILABLE -> Icons.Default.PlayArrow
+    LessonStatus.LOCKED -> Icons.Default.Lock
+    LessonStatus.COMING_SOON -> Icons.Default.Schedule
 }
 
 // ─── Bijdragen-CTA ────────────────────────────────────────────────────────────

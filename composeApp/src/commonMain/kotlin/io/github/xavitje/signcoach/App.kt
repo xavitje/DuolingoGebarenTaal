@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -91,7 +92,7 @@ fun App() {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CoachScreen(viewModel: CoachViewModel, onBack: () -> Unit = {}) {
+fun CoachScreen(viewModel: CoachViewModel, onBack: () -> Unit = {}, onNext: (() -> Unit)? = null) {
     val state by viewModel.state.collectAsState()
     val selected = state.templates.firstOrNull { it.id == state.selectedTemplateId }
 
@@ -154,12 +155,31 @@ fun CoachScreen(viewModel: CoachViewModel, onBack: () -> Unit = {}) {
                     }
                 }
                 Spacer(Modifier.height(32.dp))
-                Button(
-                    onClick = onBack,
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = RoundedCornerShape(50),
-                    colors = ButtonDefaults.buttonColors(containerColor = Coral, contentColor = Color.White),
-                ) { Text(stringResource(Res.string.coach_back_to_learn), fontWeight = FontWeight.Bold) }
+                // Direct door naar het volgende gebaar: houdt het tempo erin, in plaats van elke
+                // keer terug naar het pad te moeten.
+                if (onNext != null) {
+                    Button(
+                        onClick = onNext,
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        shape = RoundedCornerShape(50),
+                        colors = ButtonDefaults.buttonColors(containerColor = Coral, contentColor = Color.White),
+                    ) { Text(stringResource(Res.string.coach_next), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
+                    Spacer(Modifier.height(10.dp))
+                    OutlinedButton(
+                        onClick = onBack,
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        shape = RoundedCornerShape(50),
+                        border = BorderStroke(1.5.dp, Plum.copy(alpha = 0.3f)),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Plum),
+                    ) { Text(stringResource(Res.string.coach_back_to_learn)) }
+                } else {
+                    Button(
+                        onClick = onBack,
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        shape = RoundedCornerShape(50),
+                        colors = ButtonDefaults.buttonColors(containerColor = Coral, contentColor = Color.White),
+                    ) { Text(stringResource(Res.string.coach_back_to_learn), fontWeight = FontWeight.Bold) }
+                }
             }
         } else {
             Column(
@@ -176,8 +196,9 @@ fun CoachScreen(viewModel: CoachViewModel, onBack: () -> Unit = {}) {
                     Text(
                         instructionFor(template.id),
                         color = Color.White.copy(alpha = 0.85f),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyLarge,
                     )
+                    RepProgress(done = state.repsDone, required = state.repsRequired, waitingForRelease = state.waitingForRelease)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -246,7 +267,7 @@ fun CoachScreen(viewModel: CoachViewModel, onBack: () -> Unit = {}) {
                     Button(
                         onClick = { viewModel.dispatch(CoachIntent.StartPractice) },
                         enabled = selected != null && state.status !in setOf(TrackerStatus.STARTING, TrackerStatus.RUNNING),
-                        modifier = Modifier.weight(1f).height(50.dp),
+                        modifier = Modifier.weight(1f).height(56.dp),
                         shape = RoundedCornerShape(50),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Coral,
@@ -258,7 +279,7 @@ fun CoachScreen(viewModel: CoachViewModel, onBack: () -> Unit = {}) {
                     OutlinedButton(
                         onClick = { viewModel.dispatch(CoachIntent.StopPractice) },
                         enabled = state.status == TrackerStatus.RUNNING || state.status == TrackerStatus.STARTING,
-                        modifier = Modifier.height(50.dp),
+                        modifier = Modifier.height(56.dp),
                         shape = RoundedCornerShape(50),
                         border = BorderStroke(1.5.dp, Color.White.copy(alpha = 0.4f)),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
@@ -267,6 +288,33 @@ fun CoachScreen(viewModel: CoachViewModel, onBack: () -> Unit = {}) {
 
                 Spacer(Modifier.height(18.dp))
             }
+        }
+    }
+}
+
+/** Herhalingen in deze les: bolletjes die groen kleuren + uitleg om los te laten tussendoor. */
+@Composable
+private fun RepProgress(done: Int, required: Int, waitingForRelease: Boolean) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            repeat(required) { i ->
+                Box(
+                    Modifier
+                        .size(18.dp)
+                        .clip(CircleShape)
+                        .background(if (i < done) io.github.xavitje.signcoach.ui.theme.Clover else Color.White.copy(alpha = 0.18f)),
+                )
+            }
+            Spacer(Modifier.width(4.dp))
+            Text(
+                stringResource(Res.string.coach_reps, done, required),
+                color = Color.White,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+        if (waitingForRelease) {
+            Text(stringResource(Res.string.coach_rep_release), color = Gold, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

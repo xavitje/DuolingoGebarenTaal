@@ -52,10 +52,10 @@
     <string name="tab_profile">Profiel</string>
 
     <!-- ProgressScreen -->
-    <string name="progress_daily_goal">Dagelijks Doel</string>
+    <string name="progress_daily_goal">Dagdoel</string>
     <string name="progress_xp_earned">%1$d / %2$d XP</string>
-    <string name="progress_current_streak">Huidige Streak</string>
-    <string name="progress_days_streak">%1$d dagen 🔥</string>
+    <string name="progress_current_streak">Dagen op rij</string>
+    <string name="progress_days_streak">%1$d dagen</string>
     <string name="progress_total_xp">Totaal XP</string>
     <string name="progress_xp_today">XP vandaag</string>
     <string name="progress_retry">Opnieuw proberen</string>
@@ -64,7 +64,7 @@
     <string name="demo_watch_first">Bekijk eerst hoe het moet</string>
     <string name="demo_coming_soon">Video volgt binnenkort voor dit gebaar — je kunt alvast oefenen.</string>
     <string name="demo_video_error">Video kon niet worden geladen — je kan alsnog gewoon oefenen.</string>
-    <string name="demo_start_practice">Start oefenen</string>
+    <string name="demo_start_practice">Doe het na!</string>
 
     <!-- ProfileScreen -->
     <string name="profile_title">Profiel</string>
@@ -109,15 +109,15 @@
     <string name="learn_cta_button">Bijdragen</string>
 
     <!-- CoachScreen -->
-    <string name="coach_title">Oefenen</string>
+    <string name="coach_title">Doe het na</string>
     <string name="coach_back">Terug</string>
     <string name="coach_success_title">Je hebt het gehaald!</string>
-    <string name="coach_success_desc">Goed gedaan! Je score is opgeslagen.</string>
+    <string name="coach_success_desc">Goed gedaan! Je kent dit gebaar nu.</string>
     <string name="coach_xp_earned">+%1$d XP verdiend!</string>
     <string name="coach_back_to_learn">Terug naar Leerpad</string>
     <string name="coach_score">Score: %1$d%%</string>
     <string name="coach_unsupported">Handtracking is op dit platform nog niet beschikbaar.</string>
-    <string name="coach_start">Start oefenen</string>
+    <string name="coach_start">Start de camera</string>
     <string name="coach_stop">Stop</string>
     
     <string name="coach_status_stopped">Klaar om te oefenen</string>
@@ -229,7 +229,7 @@
     <!-- ProgressScreen: lege staat voor nieuwe gebruikers (Fase D) -->
     <string name="progress_empty_title">Je hebt nog niets geoefend</string>
     <string name="progress_empty_desc">Begin met je eerste gebaar om je streak en XP te zien groeien.</string>
-    <string name="learn_locked_toast">Haal eerst les %1$d, dan gaat deze open.</string>
+    <string name="learn_locked_toast">Haal eerst %1$s, dan gaat deze open.</string>
     <string name="learn_coming_soon_toast">Dit gebaar komt binnenkort!</string>
     <string name="learn_coming_soon">Komt binnenkort</string>
     <string name="learn_completed">Gehaald</string>
@@ -239,4 +239,35 @@
     <string name="selfcheck_watch_again">Nog een keer kijken</string>
     <string name="login_subtitle_asl">Leer Amerikaanse Gebarentaal (ASL)</string>
     <string name="register_subtitle_asl">Begin je leerreis ASL</string>
+    <string name="coach_next">Volgend gebaar</string>
+    <string name="coach_reps">%1$d van %2$d keer goed</string>
+    <string name="coach_rep_release">Goed zo! Laat je hand even zakken en doe het nog een keer.</string>
+    <string name="learn_unit_progress">%1$d van %2$d gehaald</string>
+    <string name="unit_alphabet">Alfabet</string>
+    <string name="unit_numbers">Cijfers</string>
+    <string name="unit_core_words">Basiswoorden</string>
+    <string name="privacy_title">Privacybeleid</string>
+    <string name="profile_section_contribute">Bijdragen</string>
+    <string name="profile_section_admin">Beheer</string>
+    <string name="profile_section_account">Account</string>
+    <string name="profile_streak_label">Reeks</string>
+    <string name="profile_streak_one">1 dag</string>
+    <string name="profile_streak_many">%1$d dagen</string>
+    <string name="profile_user_fallback">Leerling</string>
+    <string name="error_network_generic">Er is een netwerkfout opgetreden.</string>
+    <string name="error_no_gesture_selected">Kies eerst een gebaar.</string>
+    <string name="error_gesture_not_available">Dit gebaar is niet beschikbaar.</string>
+    <string name="progress_goal_remaining">Nog %1$d XP voor je dagdoel</string>
+    <string name="progress_goal_done">Dagdoel gehaald!</string>
+    <string name="progress_freeze_title">Reeks-bescherming: %1$d</string>
+    <string name="progress_freeze_desc">Mis je een dag? Dan blijft je reeks toch staan. Je krijgt er 1 per maand.</string>
+    <string name="progress_badges_title">Je badges</string>
+    <string name="badge_eerste_stap">Eerste stap</string>
+    <string name="badge_streak_7">7 dagen op rij</string>
+    <string name="badge_streak_30">30 dagen op rij</string>
+    <string name="badge_alfabet_compleet">Alfabet compleet</string>
+    <string name="badge_cijfers_compleet">Cijfers compleet</string>
+    <string name="badge_vroege_vogel">Vroege vogel</string>
+    <string name="badge_perfecte_les">Perfecte les</string>
+    <string name="badge_bijdrager">Bijdrager</string>
 </resources>

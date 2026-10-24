@@ -52,10 +52,10 @@
     <string name="tab_profile">Profile</string>
 
     <!-- ProgressScreen -->
-    <string name="progress_daily_goal">Daily Goal</string>
+    <string name="progress_daily_goal">Daily goal</string>
     <string name="progress_xp_earned">%1$d / %2$d XP</string>
-    <string name="progress_current_streak">Current Streak</string>
-    <string name="progress_days_streak">%1$d days 🔥</string>
+    <string name="progress_current_streak">Days in a row</string>
+    <string name="progress_days_streak">%1$d days</string>
     <string name="progress_total_xp">Total XP</string>
     <string name="progress_xp_today">XP today</string>
     <string name="progress_retry">Try again</string>
@@ -64,7 +64,7 @@
     <string name="demo_watch_first">Watch how it's done first</string>
     <string name="demo_coming_soon">Video coming soon for this gesture — you can practice already.</string>
     <string name="demo_video_error">Couldn’t load the video — you can still practice.</string>
-    <string name="demo_start_practice">Start practicing</string>
+    <string name="demo_start_practice">Your turn!</string>
 
     <!-- ProfileScreen -->
     <string name="profile_title">Profile</string>
@@ -109,15 +109,15 @@
     <string name="learn_cta_button">Contribute</string>
 
     <!-- CoachScreen -->
-    <string name="coach_title">Practice</string>
+    <string name="coach_title">Your turn</string>
     <string name="coach_back">Back</string>
     <string name="coach_success_title">You did it!</string>
-    <string name="coach_success_desc">Well done! Your score is saved.</string>
+    <string name="coach_success_desc">Great job! You know this sign now.</string>
     <string name="coach_xp_earned">+%1$d XP earned!</string>
     <string name="coach_back_to_learn">Back to Learning Path</string>
     <string name="coach_score">Score: %1$d%%</string>
     <string name="coach_unsupported">Hand tracking is not yet available on this platform.</string>
-    <string name="coach_start">Start practice</string>
+    <string name="coach_start">Start camera</string>
     <string name="coach_stop">Stop</string>
     
     <string name="coach_status_stopped">Ready to practice</string>
@@ -229,7 +229,7 @@
     <!-- ProgressScreen: empty state for new users (Fase D) -->
     <string name="progress_empty_title">You haven\'t practiced yet</string>
     <string name="progress_empty_desc">Start your first gesture to see your streak and XP grow.</string>
-    <string name="learn_locked_toast">Finish lesson %1$d first to open this one.</string>
+    <string name="learn_locked_toast">Finish %1$s first to open this one.</string>
     <string name="learn_coming_soon_toast">This sign is coming soon!</string>
     <string name="learn_coming_soon">Coming soon</string>
     <string name="learn_completed">Completed</string>
@@ -239,4 +239,35 @@
     <string name="selfcheck_watch_again">Watch again</string>
     <string name="login_subtitle_asl">Learn American Sign Language (ASL)</string>
     <string name="register_subtitle_asl">Start your ASL learning journey</string>
+    <string name="coach_next">Next sign</string>
+    <string name="coach_reps">%1$d of %2$d done</string>
+    <string name="coach_rep_release">Nice! Lower your hand, then do it again.</string>
+    <string name="learn_unit_progress">%1$d of %2$d done</string>
+    <string name="unit_alphabet">Alphabet</string>
+    <string name="unit_numbers">Numbers</string>
+    <string name="unit_core_words">Basic words</string>
+    <string name="privacy_title">Privacy policy</string>
+    <string name="profile_section_contribute">Contribute</string>
+    <string name="profile_section_admin">Admin</string>
+    <string name="profile_section_account">Account</string>
+    <string name="profile_streak_label">Streak</string>
+    <string name="profile_streak_one">1 day</string>
+    <string name="profile_streak_many">%1$d days</string>
+    <string name="profile_user_fallback">Student</string>
+    <string name="error_network_generic">A network error occurred.</string>
+    <string name="error_no_gesture_selected">Choose a sign first.</string>
+    <string name="error_gesture_not_available">This sign is not available.</string>
+    <string name="progress_goal_remaining">%1$d XP to go today</string>
+    <string name="progress_goal_done">Daily goal reached!</string>
+    <string name="progress_freeze_title">Streak shield: %1$d</string>
+    <string name="progress_freeze_desc">Miss a day? Your streak stays safe. You get 1 each month.</string>
+    <string name="progress_badges_title">Your badges</string>
+    <string name="badge_eerste_stap">First step</string>
+    <string name="badge_streak_7">7-day streak</string>
+    <string name="badge_streak_30">30-day streak</string>
+    <string name="badge_alfabet_compleet">Alphabet done</string>
+    <string name="badge_cijfers_compleet">Numbers done</string>
+    <string name="badge_vroege_vogel">Early bird</string>
+    <string name="badge_perfecte_les">Perfect lesson</string>
+    <string name="badge_bijdrager">Contributor</string>
 </resources>

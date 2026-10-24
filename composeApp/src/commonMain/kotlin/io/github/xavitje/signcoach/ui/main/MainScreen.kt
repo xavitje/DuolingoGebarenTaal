@@ -93,6 +93,10 @@ fun MainScreen(
     // Maak/vernieuw CoachViewModel wanneer een les geselecteerd wordt.
     LaunchedEffect(learnState.selectedGesture) {
         val gesture = learnState.selectedGesture
+        // Altijd eerst de vorige oefening (camera/tracker) stoppen: met "Volgend gebaar" gaat
+        // de leerling van les naar les zonder tussendoor de overlay te sluiten.
+        coachViewModel?.clear()
+        coachViewModel = null
         if (gesture != null && gesture.hasTemplate) {
             // Filter de templates op het geselecteerde gebaar zodat CoachScreen alleen
             // die ene les toont.

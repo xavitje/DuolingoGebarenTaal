@@ -98,6 +98,29 @@ class LearnViewModel(
     }
 
     /**
+     * Opent direct de volgende les na een gehaalde les ("Volgend gebaar"). [justCompleted] telt
+     * als gehaald, ook als het lokaal opslaan nog loopt. Is er geen volgende les, dan sluit de les.
+     */
+    fun openNextLesson(justCompleted: CurriculumGesture) {
+        scope.launch {
+            val userId = SessionStore.load()?.userId
+            val completed = (if (userId != null) offlineProgress.completedGestureIds(userId, signLanguage()) else emptySet()) +
+                justCompleted.id
+            val units = LessonUnlocker.apply(rawUnits, completed)
+            val nextId = LessonUnlocker.nextLessonId(units)
+            val next = units.asSequence().flatMap { it.gestures.asSequence() }.firstOrNull { it.id == nextId }
+            _state.update { it.copy(units = units, nextLessonId = nextId, selectedGesture = next) }
+        }
+    }
+
+    /** Is er na [current] nog een les om te openen? (voor het tonen van "Volgend gebaar") */
+    fun hasNextLesson(current: CurriculumGesture): Boolean {
+        val userId = SessionStore.load()?.userId
+        val completed = (if (userId != null) offlineProgress.completedGestureIds(userId, signLanguage()) else emptySet()) + current.id
+        return LessonUnlocker.nextLessonId(LessonUnlocker.apply(rawUnits, completed)) != null
+    }
+
+    /**
      * Rondt een les af zonder camera-herkenning (gebaar heeft alleen een demovideo): de leerling
      * heeft het gebaar nagedaan en geeft zelf aan dat het lukte. Telt als gehaald en levert XP op
      * via dezelfde offline-first route als een camera-oefening. Geeft de verdiende XP terug.

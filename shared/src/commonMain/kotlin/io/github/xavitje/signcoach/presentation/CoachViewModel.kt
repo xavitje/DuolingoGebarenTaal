@@ -8,6 +8,7 @@ import io.github.xavitje.signcoach.data.model.TrackerStatus
 import io.github.xavitje.signcoach.data.repository.TemplateRepository
 import io.github.xavitje.signcoach.domain.coach.CoachIntent
 import io.github.xavitje.signcoach.domain.coach.CoachReducer
+import io.github.xavitje.signcoach.domain.coach.RepCounter
 import io.github.xavitje.signcoach.domain.scoring.DynamicGestureScorer
 import io.github.xavitje.signcoach.domain.scoring.GestureScorer
 import io.github.xavitje.signcoach.domain.scoring.StaticGestureScorer
@@ -120,19 +121,26 @@ class CoachViewModel(
                             }
                             val scoreResult = scorer.score(withPose.recentPoses, currentSelected)
                             
-                            // Automatisch voltooien als het gebaar minstens 90% correct is voor 2.5 seconden
-                            if (scoreResult.score >= 0.90f && current.status == TrackerStatus.RUNNING) {
-                                if (highScoreSinceMs == null) {
-                                    highScoreSinceMs = pose.timestampMs
-                                } else if (pose.timestampMs - highScoreSinceMs!! >= 2500L) {
-                                    scope.launch { dispatch(CoachIntent.CompletePractice(scoreResult.score)) }
-                                }
-                            } else {
-                                highScoreSinceMs = null
+                            // Herhalingen: een herhaling telt als het gebaar minstens 90% correct is
+                            // gedurende HOLD_MS. Daarna moet de leerling eerst loslaten (score onder
+                            // RELEASE_SCORE) voordat de volgende telt. Na repsRequired keer is de les
+                            // gehaald. Pure telling staat in RepCounter (los getest).
+                            val step = RepCounter.step(
+                                score = scoreResult.score,
+                                running = current.status == TrackerStatus.RUNNING,
+                                timestampMs = pose.timestampMs,
+                                highScoreSinceMs = highScoreSinceMs,
+                                waitingForRelease = current.waitingForRelease,
+                                repsDone = current.repsDone,
+                                repsRequired = current.repsRequired,
+                            )
+                            highScoreSinceMs = step.highScoreSinceMs
+                            if (step.completed) {
+                                scope.launch { dispatch(CoachIntent.CompletePractice(scoreResult.score)) }
                             }
-                            
+
                             CoachReducer.feedbackReceived(
-                                withPose,
+                                withPose.copy(repsDone = step.repsDone, waitingForRelease = step.waitingForRelease),
                                 scoreResult,
                             )
                         }
