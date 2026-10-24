@@ -229,4 +229,14 @@
     <!-- ProgressScreen: empty state for new users (Fase D) -->
     <string name="progress_empty_title">You haven\'t practiced yet</string>
     <string name="progress_empty_desc">Start your first gesture to see your streak and XP grow.</string>
+    <string name="learn_locked_toast">Finish lesson %1$d first to open this one.</string>
+    <string name="learn_coming_soon_toast">This sign is coming soon!</string>
+    <string name="learn_coming_soon">Coming soon</string>
+    <string name="learn_completed">Completed</string>
+    <string name="selfcheck_title">Your turn!</string>
+    <string name="selfcheck_desc">Copy the sign a few times, just like in the video. Did it work?</string>
+    <string name="selfcheck_done">I did it!</string>
+    <string name="selfcheck_watch_again">Watch again</string>
+    <string name="login_subtitle_asl">Learn American Sign Language (ASL)</string>
+    <string name="register_subtitle_asl">Start your ASL learning journey</string>
 </resources>

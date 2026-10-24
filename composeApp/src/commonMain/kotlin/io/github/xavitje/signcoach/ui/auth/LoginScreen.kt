@@ -131,7 +131,12 @@ fun LoginScreen(
                 Spacer(Modifier.height(20.dp))
                 Text("SignCoach", style = MaterialTheme.typography.headlineMedium, color = Color.White)
                 Text(
-                    stringResource(Res.string.login_subtitle),
+                    stringResource(
+                        // Volgt de gekozen gebarentaal, zodat er niet "Nederlandse Gebarentaal"
+                        // staat terwijl de leerling ASL heeft gekozen.
+                        if (io.github.xavitje.signcoach.data.local.SessionStore.getSignLanguage() == "asl") Res.string.login_subtitle_asl
+                        else Res.string.login_subtitle
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.8f),
                 )

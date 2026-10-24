@@ -1,0 +1,12 @@
+-- Migratie van schemaversie 2 -> 3: lokaal bijhouden welke lessen gehaald zijn, zodat het
+-- leerpad op voortgang ontgrendelt in plaats van op "heeft dit gebaar een template".
+CREATE TABLE IF NOT EXISTS completedGesture (
+    userId TEXT NOT NULL,
+    gestureId TEXT NOT NULL,
+    signLanguage TEXT NOT NULL,
+    PRIMARY KEY (userId, gestureId, signLanguage)
+);
+
+-- Bestaande, nog niet gesynchroniseerde oefeningen zijn per definitie gehaalde lessen.
+INSERT OR IGNORE INTO completedGesture(userId, gestureId, signLanguage)
+SELECT userId, gestureId, signLanguage FROM pendingPractice;

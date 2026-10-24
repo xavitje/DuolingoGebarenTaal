@@ -73,3 +73,20 @@ INSERT OR IGNORE INTO localPracticedToday(gestureId, signLanguage, date) VALUES 
 
 clearPracticedBefore:
 DELETE FROM localPracticedToday WHERE date < ?;
+
+-- Welke lessen (gebaren) een gebruiker ooit gehaald heeft, per gebarentaal. Bepaalt samen met
+-- LessonUnlocker welke les op het leerpad open staat. Lokaal bijgehouden zodat het leerpad ook
+-- offline klopt; aangevuld met wat de server (user_progress) weet zodra er verbinding is.
+-- Wordt nooit opgeruimd: "gehaald" blijft gehaald.
+CREATE TABLE completedGesture (
+    userId TEXT NOT NULL,
+    gestureId TEXT NOT NULL,
+    signLanguage TEXT NOT NULL,
+    PRIMARY KEY (userId, gestureId, signLanguage)
+);
+
+markGestureCompleted:
+INSERT OR IGNORE INTO completedGesture(userId, gestureId, signLanguage) VALUES (?, ?, ?);
+
+selectCompletedGestureIds:
+SELECT gestureId FROM completedGesture WHERE userId = ? AND signLanguage = ?;

@@ -6,6 +6,8 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.header
 import io.ktor.client.request.post
+import io.ktor.client.request.parameter
+import io.ktor.client.request.get
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
@@ -60,6 +62,27 @@ class ProgressApi(
             contentType(ContentType.Application.Json)
             setBody(RecordPracticeRequest(gestureId, score))
         }
+    }
+
+    @Serializable
+    private data class CompletedRow(@SerialName("gesture_id") val gestureId: String)
+
+    /**
+     * Haalt op welke gebaren deze gebruiker in [signLanguage] al eens gehaald heeft, uit
+     * `user_progress` (RLS: alleen eigen rijen). Een rij ontstaat pas via `record_practice`, dus
+     * na een geslaagde oefening. Best-effort: bij een fout houdt de app de lokale waarheid aan.
+     */
+    suspend fun fetchCompletedGestureIds(
+        accessToken: String,
+        signLanguage: String,
+    ): Result<List<String>> = safeApiCall {
+        val response: HttpResponse = client.get("$baseUrl/rest/v1/user_progress") {
+            header("apikey", anonKey)
+            header("Authorization", "Bearer $accessToken")
+            parameter("select", "gesture_id")
+            parameter("sign_language", "eq.$signLanguage")
+        }
+        response.body<List<CompletedRow>>().map { it.gestureId }
     }
 
     /**

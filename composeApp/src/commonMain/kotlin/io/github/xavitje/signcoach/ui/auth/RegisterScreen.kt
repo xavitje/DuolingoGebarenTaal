@@ -114,7 +114,12 @@ fun RegisterScreen(
                 Spacer(Modifier.height(16.dp))
                 Text(stringResource(Res.string.register_title_main), style = MaterialTheme.typography.headlineMedium, color = Color.White)
                 Text(
-                    stringResource(Res.string.register_subtitle),
+                    stringResource(
+                        // Volgt de gekozen gebarentaal, zodat er niet "Nederlandse Gebarentaal"
+                        // staat terwijl de leerling ASL heeft gekozen.
+                        if (io.github.xavitje.signcoach.data.local.SessionStore.getSignLanguage() == "asl") Res.string.register_subtitle_asl
+                        else Res.string.register_subtitle
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.8f),
                 )

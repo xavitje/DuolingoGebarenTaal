@@ -37,6 +37,7 @@ import io.github.xavitje.signcoach.presentation.AdminViewModel
 import io.github.xavitje.signcoach.presentation.AuthViewModel
 import io.github.xavitje.signcoach.presentation.CoachViewModel
 import io.github.xavitje.signcoach.presentation.LearnViewModel
+import io.github.xavitje.signcoach.ui.common.PlatformBackHandler
 
 import org.jetbrains.compose.resources.stringResource
 import io.github.xavitje.signcoach.resources.Res
@@ -112,6 +113,12 @@ fun MainScreen(
         onDispose { coachViewModel?.clear() }
     }
 
+    // Terugknop op een ander tabblad gaat eerst terug naar Leren in plaats van de app te sluiten.
+    // (In een les vangt LessonOverlay de terugknop zelf af.)
+    PlatformBackHandler(enabled = selectedTab != MainTab.LEARN && learnState.selectedGesture == null) {
+        selectedTab = MainTab.LEARN
+    }
+
     val navItemColors = androidx.compose.material3.NavigationBarItemDefaults.colors(
         selectedIconColor = io.github.xavitje.signcoach.ui.theme.Coral,
         selectedTextColor = io.github.xavitje.signcoach.ui.theme.Coral,
@@ -185,18 +192,18 @@ fun MainScreen(
 
             // ── CoachScreen overlay (schuift omhoog als een les geselecteerd is) ──
             AnimatedVisibility(
-                visible = learnState.selectedGesture != null && coachViewModel != null,
+                // Elke geopende les toont de overlay — ook zonder herkenningstemplate (dan volgt
+                // na de demo de zelfcheck). Voorheen opende zo'n les helemaal niet.
+                visible = learnState.selectedGesture != null,
                 enter = slideInVertically { it } + fadeIn(),
                 exit = slideOutVertically { it } + fadeOut(),
             ) {
-                val vm = coachViewModel
-                if (vm != null) {
-                    LessonOverlay(
-                        gesture = learnState.selectedGesture,
-                        coachViewModel = vm,
-                        onBack = { learnViewModel.clearSelection() },
-                    )
-                }
+                LessonOverlay(
+                    gesture = learnState.selectedGesture,
+                    coachViewModel = coachViewModel,
+                    learnViewModel = learnViewModel,
+                    onBack = { learnViewModel.clearSelection() },
+                )
             }
         }
     }

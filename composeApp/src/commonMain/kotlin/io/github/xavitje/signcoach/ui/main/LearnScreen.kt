@@ -15,13 +15,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.xavitje.signcoach.data.model.CurriculumGesture
 import io.github.xavitje.signcoach.data.model.CurriculumUnit
+import io.github.xavitje.signcoach.data.model.LessonStatus
 import io.github.xavitje.signcoach.presentation.LearnViewModel
 import io.github.xavitje.signcoach.presentation.ProgressViewModel
 import io.github.xavitje.signcoach.ui.theme.Clover
@@ -45,6 +50,7 @@ import io.github.xavitje.signcoach.ui.theme.CoralDeep
 import io.github.xavitje.signcoach.ui.theme.Gold
 import io.github.xavitje.signcoach.ui.theme.Plum
 import io.github.xavitje.signcoach.ui.theme.PlumDeep
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import io.github.xavitje.signcoach.resources.Res
 import io.github.xavitje.signcoach.resources.*
@@ -72,12 +78,23 @@ fun LearnScreen(
     val state by viewModel.state.collectAsState()
     val progressState by progressViewModel.state.collectAsState()
 
-    val currentGestureId = remember(state.units) {
-        state.units.flatMap { it.gestures }.firstOrNull { it.hasTemplate }?.id
+    // START-label op de eerstvolgende niet-gehaalde les (bepaald door LessonUnlocker), niet
+    // meer op "het eerste gebaar met een template".
+    val currentGestureId = state.nextLessonId
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarScope = rememberCoroutineScope()
+
+    fun showMessage(text: suspend () -> String) {
+        snackbarScope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            snackbarHostState.showSnackbar(text())
+        }
     }
 
     Scaffold(
         containerColor = PlumDeep,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             // Geen titelbalk — alleen de statusbalk-inzet vullen met de schermkleur zodat het
             // geheel doorloopt, net als op de SignCoach Redesign-artifact.
@@ -114,7 +131,21 @@ fun LearnScreen(
                     WindingUnitPath(
                         gestures = unit.gestures,
                         currentGestureId = currentGestureId,
-                        onClick = onStartLesson,
+                        onClick = { index ->
+                            val gesture = unit.gestures[index]
+                            when (gesture.status) {
+                                LessonStatus.AVAILABLE, LessonStatus.COMPLETED -> onStartLesson(gesture.id)
+                                LessonStatus.COMING_SOON -> showMessage { getString(Res.string.learn_coming_soon_toast) }
+                                LessonStatus.LOCKED -> {
+                                    // Verwijs naar de les die eerst gehaald moet worden: de
+                                    // laatste open les vóór deze (zelfde nummering als op het pad).
+                                    val blocker = unit.gestures.subList(0, index)
+                                        .indexOfLast { it.status == LessonStatus.AVAILABLE }
+                                    val lessonNumber = (if (blocker >= 0) blocker else 0) + 1
+                                    showMessage { getString(Res.string.learn_locked_toast, lessonNumber) }
+                                }
+                            }
+                        },
                     )
                 }
                 item { Spacer(Modifier.height(16.dp)) }
@@ -240,7 +271,7 @@ private fun pathXFraction(index: Int): Float =
 private fun WindingUnitPath(
     gestures: List<CurriculumGesture>,
     currentGestureId: String?,
-    onClick: (String) -> Unit,
+    onClick: (index: Int) -> Unit,
 ) {
     if (gestures.isEmpty()) return
 
@@ -290,10 +321,10 @@ private fun WindingUnitPath(
                 contentAlignment = Alignment.Center,
             ) {
                 PathNodeBadge(
-                    locked = !gesture.hasTemplate,
+                    status = gesture.status,
                     current = gesture.id == currentGestureId,
                     index = i,
-                    onClick = { onClick(gesture.id) },
+                    onClick = { onClick(i) },
                 )
             }
         }
@@ -301,7 +332,8 @@ private fun WindingUnitPath(
 }
 
 @Composable
-private fun PathNodeBadge(locked: Boolean, current: Boolean, index: Int, onClick: () -> Unit) {
+private fun PathNodeBadge(status: LessonStatus, current: Boolean, index: Int, onClick: () -> Unit) {
+    val locked = status == LessonStatus.LOCKED || status == LessonStatus.COMING_SOON
     val rimSize = if (current) 68.dp else 54.dp
     val ballSize = if (current) 54.dp else 42.dp
 
@@ -365,13 +397,17 @@ private fun PathNodeBadge(locked: Boolean, current: Boolean, index: Int, onClick
                         .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
-                                colors = if (locked)
-                                    listOf(Color(0xFFF4F0FA), Color(0xFFCFC5E3))
-                                else
-                                    listOf(Color(0xFFFFA482), CoralDeep),
+                                colors = when (status) {
+                                    LessonStatus.COMPLETED -> listOf(Color(0xFF6FE0A0), Clover)
+                                    LessonStatus.AVAILABLE -> listOf(Color(0xFFFFA482), CoralDeep)
+                                    LessonStatus.LOCKED -> listOf(Color(0xFFF4F0FA), Color(0xFFCFC5E3))
+                                    LessonStatus.COMING_SOON -> listOf(Color(0xFFE9E4F1), Color(0xFFB9AED0))
+                                },
                             )
                         )
-                        .then(if (!locked) Modifier.clickable(onClick = onClick) else Modifier),
+                        // Ook vergrendelde nodes zijn tikbaar: dan volgt een uitleg-melding
+                        // in plaats van stilte (een kind denkt anders dat de app kapot is).
+                        .clickable(onClick = onClick),
                     contentAlignment = Alignment.Center,
                 ) {
                     // Glans linksboven — suggereert een bolle, glazige badge.
@@ -384,9 +420,19 @@ private fun PathNodeBadge(locked: Boolean, current: Boolean, index: Int, onClick
                             .background(Color.White.copy(alpha = 0.55f)),
                     )
                     Icon(
-                        imageVector = if (locked) Icons.Default.Lock else Icons.Default.PlayArrow,
+                        imageVector = when (status) {
+                            LessonStatus.COMPLETED -> Icons.Default.Check
+                            LessonStatus.AVAILABLE -> Icons.Default.PlayArrow
+                            LessonStatus.LOCKED -> Icons.Default.Lock
+                            LessonStatus.COMING_SOON -> Icons.Default.Schedule
+                        },
                         contentDescription = stringResource(
-                            if (locked) Res.string.learn_locked else Res.string.learn_practice
+                            when (status) {
+                                LessonStatus.COMPLETED -> Res.string.learn_completed
+                                LessonStatus.AVAILABLE -> Res.string.learn_practice
+                                LessonStatus.LOCKED -> Res.string.learn_locked
+                                LessonStatus.COMING_SOON -> Res.string.learn_coming_soon
+                            }
                         ),
                         tint = if (locked) Plum.copy(alpha = 0.55f) else Color.White,
                         modifier = Modifier.size(if (current) 26.dp else 20.dp),

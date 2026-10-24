@@ -124,10 +124,27 @@ class OfflineProgressRepository(
                 )
                 queries.markPracticedToday(gestureId, signLanguage, tStr)
                 queries.insertPendingPractice(userId, gestureId, signLanguage, score.toDouble(), Clock.System.now().toEpochMilliseconds())
+                queries.markGestureCompleted(userId, gestureId, signLanguage)
             }
             queries.clearPracticedBefore(tStr)
             result.xpEarned
         }.getOrNull()
+    }
+
+    /** Lessen die deze gebruiker in deze gebarentaal al gehaald heeft (lokale waarheid). */
+    fun completedGestureIds(userId: String, signLanguage: String): Set<String> =
+        runCatching { queries.selectCompletedGestureIds(userId, signLanguage).executeAsList().toSet() }
+            .getOrDefault(emptySet())
+
+    /** Neemt gehaalde lessen over die de server kent (bv. van een ander apparaat). Alleen
+     * toevoegen, nooit weghalen: een lokaal gehaalde les die nog in de sync-wachtrij staat mag
+     * niet verdwijnen omdat de server hem nog niet kent. */
+    fun mergeServerCompleted(userId: String, signLanguage: String, gestureIds: Collection<String>) {
+        runCatching {
+            queries.transaction {
+                gestureIds.forEach { queries.markGestureCompleted(userId, it, signLanguage) }
+            }
+        }
     }
 
     private fun defaultProfileRow(userId: String): LocalProfile = LocalProfile(

@@ -229,4 +229,14 @@
     <!-- ProgressScreen: lege staat voor nieuwe gebruikers (Fase D) -->
     <string name="progress_empty_title">Je hebt nog niets geoefend</string>
     <string name="progress_empty_desc">Begin met je eerste gebaar om je streak en XP te zien groeien.</string>
+    <string name="learn_locked_toast">Haal eerst les %1$d, dan gaat deze open.</string>
+    <string name="learn_coming_soon_toast">Dit gebaar komt binnenkort!</string>
+    <string name="learn_coming_soon">Komt binnenkort</string>
+    <string name="learn_completed">Gehaald</string>
+    <string name="selfcheck_title">Nu jij!</string>
+    <string name="selfcheck_desc">Doe het gebaar een paar keer na, net als in de video. Lukt het?</string>
+    <string name="selfcheck_done">Gelukt!</string>
+    <string name="selfcheck_watch_again">Nog een keer kijken</string>
+    <string name="login_subtitle_asl">Leer Amerikaanse Gebarentaal (ASL)</string>
+    <string name="register_subtitle_asl">Begin je leerreis ASL</string>
 </resources>

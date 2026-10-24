@@ -31,4 +31,24 @@ data class CurriculumGesture(
     val demoVideoUrl: String? = null,
     /** [SignLanguage.code] — welke gebarentaal dit teken hoort. */
     val language: String = "ngt",
-)
+    /** Of de leerling deze les mag openen. Volgt uit de VOORTGANG van de leerling (zie
+     * [io.github.xavitje.signcoach.domain.progress.LessonUnlocker]), niet uit [hasTemplate]:
+     * "op slot" betekent "nog niet aan toe", nooit "er is nog geen herkenningsdata". */
+    val status: LessonStatus = LessonStatus.LOCKED,
+) {
+    /** Er is iets om te leren: een herkenningstemplate (camera-oefening) en/of een demovideo
+     * (kijken + zelfcheck). Zonder beide is de les "komt binnenkort". */
+    val hasContent: Boolean get() = hasTemplate || demoVideoUrl != null
+}
+
+/** Status van een les op het leerpad. */
+enum class LessonStatus {
+    /** Vorige les nog niet gehaald. */
+    LOCKED,
+    /** Mag geopend worden — de eerste les van een unit is dat altijd. */
+    AVAILABLE,
+    /** Al eens gehaald; mag opnieuw geoefend worden. */
+    COMPLETED,
+    /** Er is nog geen content (geen template en geen video). Blokkeert de volgende les niet. */
+    COMING_SOON,
+}
