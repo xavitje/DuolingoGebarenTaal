@@ -1,0 +1,185 @@
+# SignCoach — beheerhandleiding
+
+Spiekbriefje voor het dagelijks beheer: rollen toewijzen, content toevoegen, bouwen en testen.
+Alle SQL hieronder plak je in Supabase onder **SQL Editor** en voer je uit met **Run**.
+
+Bijgewerkt: 25 oktober 2026 (na fase 0, 1 en 2 van het implementatieplan).
+
+---
+
+## 1. Rollen
+
+Elke gebruiker heeft één rol. Nieuwe accounts zijn altijd **student**.
+
+| Rol (in de database) | Wie | Ziet en mag |
+| --- | --- | --- |
+| `student` | Leerling | Leerpad, oefenen, eigen voortgang en badges |
+| `teacher` | Docent | Nu nog hetzelfde als student (klasoverzicht komt in fase 3) |
+| `school_admin` | ICT-coördinator / directie | Nu nog hetzelfde als student (beheer komt in fase 3) |
+| `professional` | Vakman: gebarentaaldocent of tolk | Gebaren opnemen via "Draag een gebaar bij" |
+| `admin` | Jij | Alles, inclusief het Admin Panel en bijdragen goedkeuren |
+
+Gebruikers kunnen hun eigen rol niet veranderen. Dat kan alleen een admin, of jij via de SQL Editor.
+Na een rolwijziging moet de gebruiker **uit- en opnieuw inloggen** in de app.
+
+### Een vakman aanwijzen
+
+```sql
+update public.profiles set role = 'professional'
+ where id = (select id from auth.users where email = 'naam@voorbeeld.nl');
+```
+
+De vakman moet eerst zelf een account hebben aangemaakt in de app. Anders verandert er niets
+("0 rows").
+
+### Een docent of schoolbeheerder aanwijzen
+
+Zelfde opdracht, met `'teacher'` of `'school_admin'` in plaats van `'professional'`.
+
+### Een rol intrekken (terug naar leerling)
+
+```sql
+update public.profiles set role = 'student'
+ where id = (select id from auth.users where email = 'naam@voorbeeld.nl');
+```
+
+### Een extra admin toevoegen
+
+Admins staan in een aparte tabel. Zet iemand in beide:
+
+```sql
+insert into public.admins (user_id)
+select id from auth.users where email = 'naam@voorbeeld.nl';
+
+update public.profiles set role = 'admin'
+ where id = (select id from auth.users where email = 'naam@voorbeeld.nl');
+```
+
+Admin afnemen: verwijder de rij uit `public.admins` en zet de rol terug op `student`.
+
+### Overzicht: wie heeft welke rol?
+
+```sql
+select u.email, p.role, p.created_at
+  from public.profiles p join auth.users u on u.id = p.id
+ order by p.role, u.email;
+```
+
+---
+
+## 2. Content: gebaren en lessen
+
+### Hoe een les open of dicht staat
+
+- De **eerste les van elke unit** staat altijd open.
+- Een les gaat open zodra de **vorige gehaald** is.
+- Een gebaar **zonder content** (geen herkenning en geen video) toont een klokje: "komt binnenkort".
+  Zo'n gebaar blokkeert het pad niet; de volgende les gaat gewoon open.
+- Een les is gehaald na **3 keer goed** voor de camera, of na "Gelukt!" bij een les met alleen een video.
+
+### Wat een gebaar oefenbaar maakt
+
+| Er is... | Dan ziet de leerling |
+| --- | --- |
+| Een goedgekeurde opname (herkenning) | Demovideo (indien aanwezig), daarna oefenen met de camera |
+| Alleen een demovideo | Demovideo, daarna zelfcheck ("Gelukt!" / "Nog een keer kijken") |
+| Niets | Klokje "komt binnenkort" |
+
+### Een opname goedkeuren
+
+Vakmensen dienen opnames in via **Profiel → Draag een gebaar bij**. Jij keurt ze goed in de app via
+**Profiel → Admin Panel**. Na goedkeuring krijgen leerlingen dat gebaar bij de volgende start van de
+app met camera-herkenning.
+
+### Een demovideo koppelen aan een gebaar
+
+```sql
+update public.gestures
+   set demo_video_url = 'https://.../letter_c.mp4'
+ where sign_language = 'ngt' and id = 'letter_c';
+```
+
+Gebaar-id's: `letter_a` … `letter_z`, `number_0` … `number_9` (NGT). De video moet via een
+openbare https-link te bereiken zijn.
+
+### Welke gebaren hebben al content?
+
+```sql
+select g.id, g.name,
+       g.demo_video_url is not null as heeft_video,
+       count(s.id) filter (where s.status = 'approved') as goedgekeurde_opnames,
+       count(s.id) filter (where s.status = 'pending')  as wacht_op_goedkeuring
+  from public.gestures g
+  left join public.gesture_samples s
+    on s.gesture_id = g.id and s.sign_language = g.sign_language
+ where g.sign_language = 'ngt'
+ group by g.id, g.name, g.demo_video_url, g.unit_id, g.order_index
+ order by g.unit_id, g.order_index;
+```
+
+---
+
+## 3. Bouwen en testen
+
+### JDK
+
+Gebruik **JDK 17** (`C:\Program Files\Java\jdk-17`). De Java die bij Android Studio zit (versie 25)
+is te nieuw voor deze Gradle-versie en geeft een foutmelding met alleen "25.0.3".
+In Android Studio: **Settings → Build, Execution, Deployment → Build Tools → Gradle → Gradle JDK**
+op 17 zetten.
+
+### Vanuit PowerShell
+
+```powershell
+cd D:\DuolingoGebarenTaal
+$env:JAVA_HOME = "C:\Program Files\Java\jdk-17"
+
+# Tests
+.\gradlew.bat :shared:testDebugUnitTest
+
+# App bouwen
+.\gradlew.bat :composeApp:assembleDebug
+```
+
+De app (APK) staat daarna in `composeApp\build\outputs\apk\debug\composeApp-debug.apk`.
+
+### Installeren op de emulator of een telefoon
+
+```powershell
+$adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
+& $adb install -r composeApp\build\outputs\apk\debug\composeApp-debug.apk
+& $adb shell am start -n io.github.xavitje.signcoach/.MainActivity
+```
+
+Let op: de emulator heeft geen echte camera. Test het oefenen met de camera op een echte telefoon.
+
+---
+
+## 4. Database-wijzigingen
+
+- Alle wijzigingen staan als SQL-bestand in `supabase/migrations/`. Voer ze in volgorde uit via de
+  SQL Editor. Ze zijn zo geschreven dat nog een keer uitvoeren geen kwaad kan.
+- `supabase/inspect/fase2_inspectie.sql` geeft een alleen-lezen overzicht van rechten (policies),
+  functies en kolommen. Handig om te plakken als iemand (of Claude) moet weten hoe de database er
+  nu uitziet.
+
+Uitgevoerd tot nu toe:
+
+| Bestand | Wat | Uitgevoerd |
+| --- | --- | --- |
+| `20260915202639_add_sign_language_support.sql` | Gebarentaal per gebaar/profiel | Ja |
+| `20261025000000_fase2_rollen.sql` | Rollen; bijdragen alleen voor vakmensen en admins | Ja, 25-10-2026 |
+
+---
+
+## 5. Bekende open punten
+
+- **Test `GestureScorerTest` faalt al** (score-berekening van de herkenning). De CI op GitHub
+  (`./gradlew test`) is daardoor rood tot dit is opgelost.
+- **iOS** is geschreven maar nooit gebouwd of getest (zie `IOS_SETUP.md`). Veel scholen gebruiken iPads.
+- **Privacybeleid** in de app is nog de tekst voor losse gebruikers; die wordt herschreven voor
+  scholen (fase 4).
+- **Lokale app-database** is bij fase 0 naar schemaversie 3 gegaan (bijhouden van gehaalde lessen).
+- Alles staat op branch **`fase-0-1-scholen`**, nog niet samengevoegd met `main`.
+
+Het volledige plan (fase 0 t/m 5) staat in het document "SignCoach — Implementatieplan voor scholen".
