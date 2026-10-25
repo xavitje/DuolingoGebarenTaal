@@ -227,7 +227,7 @@
     <string name="profile_delete_account_confirm_button">Delete permanently</string>
 
     <!-- ProgressScreen: empty state for new users (Fase D) -->
-    <string name="progress_empty_title">You haven\'t practiced yet</string>
+    <string name="progress_empty_title">You haven't practiced yet</string>
     <string name="progress_empty_desc">Start your first gesture to see your streak and XP grow.</string>
     <string name="learn_locked_toast">Finish %1$s first to open this one.</string>
     <string name="learn_coming_soon_toast">This sign is coming soon!</string>
@@ -270,17 +270,17 @@
     <string name="badge_vroege_vogel">Early bird</string>
     <string name="badge_perfecte_les">Perfect lesson</string>
     <string name="badge_bijdrager">Contributor</string>
-    <string name="student_login_button">I\'m a student</string>
+    <string name="student_login_button">I'm a student</string>
     <string name="student_login_title">Student sign-in</string>
-    <string name="student_code_title">What\'s your class code?</string>
+    <string name="student_code_title">What's your class code?</string>
     <string name="student_code_hint">The 6-character code from your teacher.</string>
     <string name="student_code_label">Class code</string>
     <string name="student_next">Next</string>
     <string name="student_name_title">Who are you?</string>
-    <string name="student_pin_title">Hi %1$s! What\'s your PIN?</string>
+    <string name="student_pin_title">Hi %1$s! What's your PIN?</string>
     <string name="student_back">Back</string>
     <string name="student_delete_digit">Delete</string>
-    <string name="student_error_code">We don\'t know this class code. Check it again.</string>
+    <string name="student_error_code">We don't know this class code. Check it again.</string>
     <string name="student_error_pin">That PIN is not right. Try again.</string>
     <string name="student_error_locked">Too many tries. Wait 15 minutes or ask your teacher for a new PIN.</string>
     <string name="student_error_network">No connection. Try again later.</string>
@@ -306,14 +306,14 @@
     <string name="teacher_reset_pin">New PIN</string>
     <string name="teacher_remove_student">Remove</string>
     <string name="teacher_remove_confirm_title">Remove %1$s?</string>
-    <string name="teacher_remove_confirm_desc">This student\'s account and all progress will be deleted. This cannot be undone.</string>
+    <string name="teacher_remove_confirm_desc">This student's account and all progress will be deleted. This cannot be undone.</string>
     <string name="teacher_pins_title">Write down these PINs</string>
     <string name="teacher_pins_desc">You only see them once. Lost one? Create a new PIN later.</string>
     <string name="teacher_done">Done</string>
     <string name="teacher_refresh">Refresh</string>
     <string name="teacher_error_no_seats">Not enough seats in the licence. %1$d left.</string>
     <string name="teacher_error_no_seats_unknown">Not enough seats in the licence.</string>
-    <string name="teacher_error_license">Your school\'s licence has expired.</string>
+    <string name="teacher_error_license">Your school's licence has expired.</string>
     <string name="teacher_error_network">No connection. Try again.</string>
     <string name="teacher_error_generic">Something went wrong. Try again.</string>
     <string name="teacher_seats">%1$d of %2$d seats used</string>

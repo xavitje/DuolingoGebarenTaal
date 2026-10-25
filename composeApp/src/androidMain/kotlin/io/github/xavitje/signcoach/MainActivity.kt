@@ -1,10 +1,13 @@
 package io.github.xavitje.signcoach
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import java.util.Locale
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,6 +40,24 @@ class MainActivity : ComponentActivity() {
         // Wat de uitkomst ook is: probeer te registreren (geen token zonder toestemming, maar
         // dat geeft PushNotificationRegistrar zelf fail-safe aan).
         activityScope.launch { pushRegistrar.registerIfPossible() }
+    }
+
+    /**
+     * App-taal (standaard Nederlands, zie SessionStore.getLanguage) toepassen vóórdat er iets
+     * getekend wordt. Op Android 13+ regelt LocaleManager dit (changeAppLanguage); op Android 8-12
+     * zou de app anders de taal van het toestel volgen — en schooltablets draaien vaak op die
+     * oudere versies.
+     */
+    override fun attachBaseContext(newBase: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            super.attachBaseContext(newBase)
+            return
+        }
+        val tag = runCatching { io.github.xavitje.signcoach.data.local.SessionStore.getLanguage() }.getOrDefault("nl")
+        val locale = Locale.forLanguageTag(tag)
+        Locale.setDefault(locale)
+        val config = Configuration(newBase.resources.configuration).apply { setLocale(locale) }
+        super.attachBaseContext(newBase.createConfigurationContext(config))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -23,6 +23,9 @@ object AndroidCameraPlatform {
     private const val TAG = "SignCoach"
     private var activityReference: WeakReference<ComponentActivity>? = null
     val applicationContext: android.content.Context? get() = activityReference?.get()?.applicationContext
+
+    /** De actieve Activity (bv. om hem opnieuw op te bouwen na een taalwissel op Android < 13). */
+    val currentActivity: ComponentActivity? get() = activityReference?.get()
     private var previewReference: WeakReference<PreviewView>? = null
     private var permissionContinuation: ((Boolean) -> Unit)? = null
     private var frontFacing = true
