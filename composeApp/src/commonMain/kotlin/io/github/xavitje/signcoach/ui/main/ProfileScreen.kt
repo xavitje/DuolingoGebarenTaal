@@ -88,6 +88,8 @@ fun ProfileScreen(
     onNavigateToPrivacy: () -> Unit = {},
     signLanguage: String = "ngt",
     onNavigateToSignLanguagePicker: () -> Unit = {},
+    /** School/klas van de gebruiker (fase 3); null = geen school. */
+    mySchool: io.github.xavitje.signcoach.data.remote.SchoolApi.MySchool? = null,
 ) {
     val authState by authViewModel.state.collectAsState()
     val progressState = progressViewModel?.state?.collectAsState()?.value
@@ -230,13 +232,23 @@ fun ProfileScreen(
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = authState.email?.substringBefore("@") ?: stringResource(Res.string.profile_user_fallback),
+                            // Leerlingen hebben geen echt e-mailadres: toon hun voornaam.
+                            text = if (authState.isSchoolStudent) {
+                                progressState?.profile?.displayName?.takeIf { it.isNotBlank() }
+                                    ?: stringResource(Res.string.profile_user_fallback)
+                            } else {
+                                authState.email?.substringBefore("@") ?: stringResource(Res.string.profile_user_fallback)
+                            },
                             style = MaterialTheme.typography.titleMedium,
                             maxLines = 1,
                             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                         )
                         Text(
-                            text = authState.email ?: "",
+                            text = if (authState.isSchoolStudent) {
+                                mySchool?.let { stringResource(Res.string.profile_student_class, it.className ?: "", it.schoolName) } ?: ""
+                            } else {
+                                authState.email ?: ""
+                            },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
@@ -407,7 +419,8 @@ fun ProfileScreen(
             // Gebarentaal — navigeert naar een los kiesscherm (ChooseSignLanguageScreen), i.p.v.
             // de inline-toggle-stijl van de UI-taalrij hierboven: met 2+ betekenisvolle opties
             // per stuk tekst is een apart scherm duidelijker dan een simpele in-place toggle.
-            Surface(
+            // Leerlingen: de school bepaalt de gebarentaal.
+            if (!authState.isSchoolStudent) Surface(
                 onClick = onNavigateToSignLanguagePicker,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
@@ -461,7 +474,9 @@ fun ProfileScreen(
 
             // Wachtwoord wijzigen — alleen zinvol voor e-mail-accounts (Google-gebruikers hebben
             // geen Supabase-wachtwoord om te wijzigen).
-            if (authState.authProvider != "google") {
+            // Leerlingen loggen in met een pin die de docent beheert: geen wachtwoord, geen
+            // Google-koppeling en geen zelf verwijderen (dat regelt de school).
+            if (authState.authProvider != "google" && !authState.isSchoolStudent) {
                 Surface(
                     onClick = { showChangePassword = true },
                     modifier = Modifier.fillMaxWidth(),
@@ -491,7 +506,9 @@ fun ProfileScreen(
             // account hangt. Hergebruikt dezelfde OAuth-flow als de inlogknop (beginGoogleSignIn +
             // BrowserLauncher); Supabase koppelt automatisch aan het huidige account zolang het
             // Google-account hetzelfde (geverifieerde) e-mailadres gebruikt als dit account.
-            if ("google" in authState.linkedProviders) {
+            if (authState.isSchoolStudent) {
+                // niets
+            } else if ("google" in authState.linkedProviders) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
@@ -569,7 +586,7 @@ fun ProfileScreen(
 
             // Account verwijderen — bewust visueel losstaand van uitloggen, geen containerkleur
             // (destructief maar niet per ongeluk aantikbaar naast "Uitloggen").
-            Surface(
+            if (!authState.isSchoolStudent) Surface(
                 onClick = { showDeleteAccount = true },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),

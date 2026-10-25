@@ -44,7 +44,7 @@ import io.github.xavitje.signcoach.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdminScreen(viewModel: AdminViewModel, onBack: () -> Unit) {
+fun AdminScreen(viewModel: AdminViewModel, onBack: () -> Unit, onOpenSchools: () -> Unit = {}) {
     val state by viewModel.state.collectAsState()
 
     androidx.compose.runtime.LaunchedEffect(Unit) {
@@ -68,6 +68,14 @@ fun AdminScreen(viewModel: AdminViewModel, onBack: () -> Unit) {
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
+            // Fase 3: scholen, licenties en docenten beheren.
+            if (state.step == AdminStep.LIST) {
+                androidx.compose.material3.Button(
+                    onClick = onOpenSchools,
+                    modifier = Modifier.fillMaxWidth().height(52.dp).padding(top = 8.dp),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+                ) { Text(stringResource(Res.string.admin_schools_button)) }
+            }
             when (state.step) {
                 AdminStep.LOGIN -> AdminLoginStep(viewModel, state.loginEmail, state.loginPassword, state.isLoggingIn, state.loginError, onBack)
                 AdminStep.LIST -> AdminListStep(viewModel, state.pendingSamples, state.isLoadingList, state.listError, onBack)

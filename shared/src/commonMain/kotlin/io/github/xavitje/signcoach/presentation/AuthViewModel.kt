@@ -71,6 +71,15 @@ data class AuthUiState(
 ) {
     /** Bijdragen (gebaren opnemen) alleen voor vakmensen en admins — nooit voor leerlingen. */
     val canContribute: Boolean get() = role.canContribute
+
+    /** Leerling van een school (ingelogd met klascode + pin, geen eigen e-mailadres). */
+    val isSchoolStudent: Boolean
+        get() = io.github.xavitje.signcoach.data.remote.SchoolApi.isSchoolStudentEmail(email)
+
+    /** Docent of schoolbeheerder: krijgt het tabblad "Klas". */
+    val isSchoolStaff: Boolean
+        get() = role == io.github.xavitje.signcoach.data.model.UserRole.TEACHER ||
+            role == io.github.xavitje.signcoach.data.model.UserRole.SCHOOL_ADMIN
 }
 
 /**
@@ -168,6 +177,23 @@ class AuthViewModel(
                         )
                     }
                 }
+        }
+    }
+
+    /**
+     * Neemt een sessie over die buiten het e-mail/wachtwoord-formulier is verkregen — de
+     * leerling-login (klascode + naam + pin, zie StudentLoginViewModel).
+     */
+    fun completeExternalLogin(session: io.github.xavitje.signcoach.data.remote.SupabaseAuthApi.AuthSession) {
+        _state.update { it.copy(isLoading = true, error = null, errorMessage = null) }
+        scope.launch {
+            SessionStore.save(
+                accessToken = session.accessToken,
+                refreshToken = session.refreshToken,
+                userId = session.user.id,
+                email = session.user.email,
+            )
+            checkAdminAndSetLoggedIn(session.accessToken, session.user.id, session.user.email, "student")
         }
     }
 

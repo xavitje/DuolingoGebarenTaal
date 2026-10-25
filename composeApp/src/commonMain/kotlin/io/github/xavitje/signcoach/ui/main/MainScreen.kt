@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
@@ -25,9 +26,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.background
+import androidx.compose.ui.unit.dp
 import io.github.xavitje.signcoach.CoachScreen
 import io.github.xavitje.signcoach.data.model.SignTemplate
 import io.github.xavitje.signcoach.data.repository.StaticTemplateRepository
@@ -44,7 +48,7 @@ import io.github.xavitje.signcoach.resources.Res
 import io.github.xavitje.signcoach.resources.*
 
 private enum class MainTab {
-    LEARN, PROGRESS, PROFILE
+    LEARN, PROGRESS, CLASS, PROFILE
 }
 
 /**
@@ -68,6 +72,14 @@ fun MainScreen(
 ) {
     var selectedTab by remember { mutableStateOf(MainTab.LEARN) }
     val authState by authViewModel.state.collectAsState()
+
+    // School/klas van deze gebruiker (fase 3). Null = geen school of nog niet geladen.
+    val mySchool by produceState<io.github.xavitje.signcoach.data.remote.SchoolApi.MySchool?>(null, authState.userId) {
+        val token = io.github.xavitje.signcoach.data.local.SessionStore.load()?.accessToken
+        value = if (token == null) null else io.github.xavitje.signcoach.data.remote.SchoolApi()
+            .mySchool(token).getOrNull()?.firstOrNull()
+    }
+    val teacherViewModel = remember { io.github.xavitje.signcoach.presentation.TeacherViewModel() }
 
     // LearnViewModel leeft op MainScreen-niveau zodat het leerpad bewaard blijft bij tab-wissels.
     val learnViewModel = remember { LearnViewModel() }
@@ -149,6 +161,16 @@ fun MainScreen(
                     label = { Text(stringResource(Res.string.tab_progress)) },
                     colors = navItemColors,
                 )
+                // Docenten en schoolbeheerders: tabblad met hun klassen.
+                if (authState.isSchoolStaff) {
+                    NavigationBarItem(
+                        selected = selectedTab == MainTab.CLASS,
+                        onClick = { selectedTab = MainTab.CLASS },
+                        icon = { Icon(Icons.Default.Groups, contentDescription = stringResource(Res.string.tab_class)) },
+                        label = { Text(stringResource(Res.string.tab_class)) },
+                        colors = navItemColors,
+                    )
+                }
                 NavigationBarItem(
                     selected = selectedTab == MainTab.PROFILE,
                     onClick = { selectedTab = MainTab.PROFILE },
@@ -192,8 +214,16 @@ fun MainScreen(
                         onNavigateToPrivacy = onNavigateToPrivacy,
                         signLanguage = signLanguage,
                         onNavigateToSignLanguagePicker = onNavigateToSignLanguagePicker,
+                        mySchool = mySchool,
                     )
+                    MainTab.CLASS -> io.github.xavitje.signcoach.ui.teacher.TeacherScreen(viewModel = teacherViewModel)
                 }
+            }
+
+            // Leerling van een school met een verlopen licentie: geen lessen, wel uitleg.
+            val school = mySchool
+            if (authState.isSchoolStudent && school != null && !school.licenseActive && selectedTab != MainTab.PROFILE) {
+                LicenseExpiredScreen(schoolName = school.schoolName)
             }
 
             // ── CoachScreen overlay (schuift omhoog als een les geselecteerd is) ──
@@ -212,5 +242,31 @@ fun MainScreen(
                 )
             }
         }
+    }
+}
+
+/** Volledig scherm voor leerlingen als de licentie van hun school verlopen is. */
+@Composable
+private fun LicenseExpiredScreen(schoolName: String) {
+    androidx.compose.foundation.layout.Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(io.github.xavitje.signcoach.ui.theme.PlumDeep)
+            .padding(32.dp),
+        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp, androidx.compose.ui.Alignment.CenterVertically),
+    ) {
+        Text("\uD83C\uDFEB", style = androidx.compose.material3.MaterialTheme.typography.displayMedium)
+        Text(
+            stringResource(Res.string.license_expired_title),
+            style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
+        Text(
+            stringResource(Res.string.license_expired_desc, schoolName),
+            style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
     }
 }

@@ -53,6 +53,8 @@ private object Routes {
     const val CONTRIBUTE = "contribute"
     const val PRIVACY = "privacy"
     const val SIGN_LANGUAGE_PICKER = "settings/sign_language"
+    const val STUDENT_LOGIN = "auth/student"
+    const val ADMIN_SCHOOLS = "admin/schools"
 }
 
 /**
@@ -172,6 +174,15 @@ fun AppNavigation(authViewModel: AuthViewModel) {
             LoginScreen(
                 viewModel = authViewModel,
                 onNavigateToRegister = { navController.navigate(Routes.REGISTER) },
+                onNavigateToStudentLogin = { navController.navigate(Routes.STUDENT_LOGIN) },
+            )
+        }
+
+        composable(Routes.STUDENT_LOGIN) {
+            val studentLoginViewModel = remember { io.github.xavitje.signcoach.presentation.StudentLoginViewModel(authViewModel) }
+            io.github.xavitje.signcoach.ui.auth.StudentLoginScreen(
+                viewModel = studentLoginViewModel,
+                onClose = { navController.popBackStack() },
             )
         }
 
@@ -202,6 +213,15 @@ fun AppNavigation(authViewModel: AuthViewModel) {
         composable(Routes.ADMIN) {
             AdminScreen(
                 viewModel = adminViewModel,
+                onBack = { navController.popBackStack() },
+                onOpenSchools = { navController.navigate(Routes.ADMIN_SCHOOLS) },
+            )
+        }
+
+        composable(Routes.ADMIN_SCHOOLS) {
+            val adminSchoolsViewModel = remember { io.github.xavitje.signcoach.presentation.AdminSchoolsViewModel() }
+            io.github.xavitje.signcoach.ui.admin.AdminSchoolsScreen(
+                viewModel = adminSchoolsViewModel,
                 onBack = { navController.popBackStack() },
             )
         }
@@ -276,7 +296,8 @@ fun AppNavigation(authViewModel: AuthViewModel) {
     LaunchedEffect(authState.status) {
         if (authState.status == AuthStatus.LOGGED_OUT) {
             val current = navController.currentDestination?.route
-            if (current != null && current != Routes.LOGIN && current != Routes.REGISTER && current != Routes.SPLASH) {
+            if (current != null && current != Routes.LOGIN && current != Routes.REGISTER &&
+                current != Routes.STUDENT_LOGIN && current != Routes.SPLASH) {
                 navController.navigate(Routes.LOGIN) {
                     popUpTo(0) { inclusive = true }
                 }
@@ -288,7 +309,7 @@ fun AppNavigation(authViewModel: AuthViewModel) {
     LaunchedEffect(authState.status) {
         if (authState.status == AuthStatus.LOGGED_IN) {
             val current = navController.currentDestination?.route
-            if (current == Routes.LOGIN || current == Routes.REGISTER) {
+            if (current == Routes.LOGIN || current == Routes.REGISTER || current == Routes.STUDENT_LOGIN) {
                 navController.navigate(Routes.MAIN) {
                     popUpTo(0) { inclusive = true }
                 }

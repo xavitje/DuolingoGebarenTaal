@@ -3,7 +3,7 @@
 Spiekbriefje voor het dagelijks beheer: rollen toewijzen, content toevoegen, bouwen en testen.
 Alle SQL hieronder plak je in Supabase onder **SQL Editor** en voer je uit met **Run**.
 
-Bijgewerkt: 25 oktober 2026 (na fase 0, 1 en 2 van het implementatieplan).
+Bijgewerkt: 25 oktober 2026 (na fase 0 t/m 3 van het implementatieplan).
 
 ---
 
@@ -14,8 +14,8 @@ Elke gebruiker heeft één rol. Nieuwe accounts zijn altijd **student**.
 | Rol (in de database) | Wie | Ziet en mag |
 | --- | --- | --- |
 | `student` | Leerling | Leerpad, oefenen, eigen voortgang en badges |
-| `teacher` | Docent | Nu nog hetzelfde als student (klasoverzicht komt in fase 3) |
-| `school_admin` | ICT-coördinator / directie | Nu nog hetzelfde als student (beheer komt in fase 3) |
+| `teacher` | Docent | Tabblad **Klas**: klassen, leerlingen, pincodes, voortgang |
+| `school_admin` | ICT-coördinator / directie | Zelfde als docent (alle klassen van de school) |
 | `professional` | Vakman: gebarentaaldocent of tolk | Gebaren opnemen via "Draag een gebaar bij" |
 | `admin` | Jij | Alles, inclusief het Admin Panel en bijdragen goedkeuren |
 
@@ -34,7 +34,9 @@ De vakman moet eerst zelf een account hebben aangemaakt in de app. Anders verand
 
 ### Een docent of schoolbeheerder aanwijzen
 
-Zelfde opdracht, met `'teacher'` of `'school_admin'` in plaats van `'professional'`.
+Doe dit in de app: **Profiel → Admin Panel → Scholen en licenties → school → Koppelen** (zie §2).
+Dan krijgt de docent meteen de juiste rol én de koppeling met de school. Alleen de rol zetten
+via SQL is niet genoeg: een docent zonder school ziet "Nog niet gekoppeld aan een school".
 
 ### Een rol intrekken (terug naar leerling)
 
@@ -67,7 +69,65 @@ select u.email, p.role, p.created_at
 
 ---
 
-## 2. Content: gebaren en lessen
+## 2. Scholen, klassen en leerlingen
+
+### Een nieuwe school (klant)
+
+1. **Profiel → Admin Panel → Scholen en licenties → Nieuwe school.** Vul naam, aantal
+   leerlingplekken en de einddatum van de licentie in (JJJJ-MM-DD).
+2. Laat de docent zelf een account aanmaken in de app (gewoon registreren met e-mail).
+3. Open de school en koppel de docent via zijn e-mailadres, als **Docent** of **Schoolbeheerder**.
+4. De docent logt uit en weer in en ziet dan het tabblad **Klas**.
+
+### Wat de docent doet
+
+1. **Klas → Nieuwe klas** (bijv. "Groep 7b"). De klas krijgt een klascode van 6 tekens.
+2. **Leerlingen toevoegen**: één voornaam per regel. De app toont daarna per leerling een
+   **pincode van 4 cijfers — maar één keer**. Opschrijven of uitprinten.
+3. Pincode kwijt? Bij de leerling op **Nieuwe pincode** tikken.
+4. Per leerling ziet de docent: gehaalde lessen, XP, dagen op rij en wanneer laatst geoefend.
+
+### Hoe een leerling inlogt
+
+Inlogscherm → **Ik ben een leerling** → klascode → eigen naam aantikken → pincode.
+Na 5 foute pincodes is die leerling 15 minuten geblokkeerd (de docent kan een nieuwe pincode maken).
+
+### Licentie verlengen of plekken erbij
+
+**Admin Panel → Scholen en licenties → school**: aantal plekken en einddatum aanpassen, **Opslaan**.
+
+Als de licentie verlopen is:
+- kunnen leerlingen niet meer inloggen (hun klascode werkt niet meer), en zien al ingelogde
+  leerlingen een melding in plaats van de lessen;
+- ziet de docent een rode melding en kan hij geen leerlingen toevoegen;
+- blijft alle voortgang bewaard. Na verlengen werkt alles weer.
+
+Zijn alle plekken vol, dan kan de docent geen nieuwe leerlingen toevoegen (bestaande leerlingen
+blijven gewoon werken).
+
+### Overzicht in SQL
+
+```sql
+select s.name, s.license_end, s.max_students,
+       public.school_seats_used(s.id) as leerlingen,
+       (select count(*) from public.classes c where c.school_id = s.id) as klassen
+  from public.schools s order by s.name;
+```
+
+### Hoe het technisch werkt
+
+- Leerlingen krijgen een account zonder echt e-mailadres (`…@students.signcoach.invalid`) en een
+  willekeurig intern wachtwoord dat niemand ziet. De pincode wordt alleen versleuteld (gehasht)
+  opgeslagen.
+- Dat regelen twee **edge functions** in Supabase: `school-students` (docent maakt leerlingen
+  aan, reset pincodes, verwijdert leerlingen) en `student-login` (leerling logt in).
+  De code staat in `supabase/functions/`.
+- Een edge function bijwerken: Supabase → **Edge Functions** → functie → **Code** → nieuwe code
+  plakken → **Deploy**.
+
+---
+
+## 3. Content: gebaren en lessen
 
 ### Hoe een les open of dicht staat
 
@@ -119,7 +179,7 @@ select g.id, g.name,
 
 ---
 
-## 3. Bouwen en testen
+## 4. Bouwen en testen
 
 ### JDK
 
@@ -155,7 +215,7 @@ Let op: de emulator heeft geen echte camera. Test het oefenen met de camera op e
 
 ---
 
-## 4. Database-wijzigingen
+## 5. Database-wijzigingen
 
 - Alle wijzigingen staan als SQL-bestand in `supabase/migrations/`. Voer ze in volgorde uit via de
   SQL Editor. Ze zijn zo geschreven dat nog een keer uitvoeren geen kwaad kan.
@@ -169,10 +229,19 @@ Uitgevoerd tot nu toe:
 | --- | --- | --- |
 | `20260915202639_add_sign_language_support.sql` | Gebarentaal per gebaar/profiel | Ja |
 | `20261025000000_fase2_rollen.sql` | Rollen; bijdragen alleen voor vakmensen en admins | Ja, 25-10-2026 |
+| `20261025210000_fase3_scholen.sql` | Scholen, klassen, leerlingen, licenties | Nog niet |
+
+Edge functions (Supabase → Edge Functions):
+
+| Functie | Wat | Gedeployd |
+| --- | --- | --- |
+| `send-streak-reminders` | Dagelijkse herinnering | (bestond al) |
+| `school-students` | Leerlingen aanmaken, pincode resetten, verwijderen | Nog niet |
+| `student-login` | Inloggen met klascode + naam + pincode | Nog niet |
 
 ---
 
-## 5. Bekende open punten
+## 6. Bekende open punten
 
 - **Test `GestureScorerTest` faalt al** (score-berekening van de herkenning). De CI op GitHub
   (`./gradlew test`) is daardoor rood tot dit is opgelost.

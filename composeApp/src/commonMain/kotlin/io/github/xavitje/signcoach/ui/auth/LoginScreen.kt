@@ -71,6 +71,7 @@ import io.github.xavitje.signcoach.domain.AppError
 fun LoginScreen(
     viewModel: AuthViewModel,
     onNavigateToRegister: () -> Unit,
+    onNavigateToStudentLogin: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -141,7 +142,26 @@ fun LoginScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.8f),
                 )
-                Spacer(Modifier.height(40.dp))
+                Spacer(Modifier.height(32.dp))
+
+                // Leerlingen (de grootste groep gebruikers) loggen in met klascode + naam + pin,
+                // niet met e-mail. Daarom de eerste en grootste knop op dit scherm.
+                Button(
+                    onClick = onNavigateToStudentLogin,
+                    modifier = Modifier.fillMaxWidth().height(60.dp),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Amber500,
+                        contentColor = io.github.xavitje.signcoach.ui.theme.PlumDeep,
+                    ),
+                ) {
+                    Text(
+                        stringResource(Res.string.student_login_button),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    )
+                }
+                Spacer(Modifier.height(24.dp))
 
                 // Formulier
                 Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), tonalElevation = 3.dp) {
