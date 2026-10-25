@@ -68,6 +68,8 @@ data class AuthUiState(
      *  dit nog niet is opgehaald of als het ophalen mislukte (bv. geen netwerk); toont dan simpelweg
      *  geen "gekoppeld"-indicator, in plaats van iets te verzinnen. */
     val linkedProviders: Set<String> = emptySet(),
+    /** Na registreren: e-mailadres waar de bevestigingslink naartoe is gestuurd (null = n.v.t.). */
+    val confirmationSentTo: String? = null,
 ) {
     /** Bijdragen (gebaren opnemen) alleen voor vakmensen en admins — nooit voor leerlingen. */
     val canContribute: Boolean get() = role.canContribute
@@ -215,7 +217,12 @@ class AuthViewModel(
         _state.update { it.copy(isLoading = true, error = null, errorMessage = null, infoMessage = null) }
         scope.launch {
             authApi.signUp(email.trim(), password)
-                .onSuccess { session ->
+                .onSuccess { result ->
+                    if (result is io.github.xavitje.signcoach.data.remote.SupabaseAuthApi.SignUpResult.ConfirmationRequired) {
+                        _state.update { it.copy(isLoading = false, confirmationSentTo = email.trim()) }
+                        return@onSuccess
+                    }
+                    val session = (result as io.github.xavitje.signcoach.data.remote.SupabaseAuthApi.SignUpResult.SignedIn).session
                     // Na registratie meteen een profielrij aanmaken, met de gebarentaal die
                     // lokaal is gekozen tijdens de onboarding (default "ngt" als er nog geen
                     // keuze is, bv. bij een bestaande sessie zonder onboarding-stap).
@@ -373,12 +380,18 @@ class AuthViewModel(
         _state.update { it.copy(errorMessage = null, infoMessage = null) }
     }
 
+    fun clearConfirmation() {
+        _state.update { it.copy(confirmationSentTo = null) }
+    }
+
     private suspend fun checkAdminAndSetLoggedIn(
         accessToken: String,
         userId: String,
         email: String?,
         authProvider: String? = null,
     ) {
+        // Best-effort: profielrij aanmaken als die ontbreekt (eerste login na e-mailbevestiging).
+        runCatching { profileApi.ensureProfile(accessToken, userId, SessionStore.getSignLanguage()) }
         val legacyAdmin = authApi.amIAdmin(accessToken).getOrDefault(false)
         // Rol uit de database; zolang de rollen-migratie er niet is (of bij een netwerkfout)
         // valt dit terug op "admin als am_i_admin() dat zegt, anders leerling" — nooit op meer

@@ -141,7 +141,7 @@
     <string name="admin_password">Wachtwoord</string>
     <string name="admin_login_btn">Inloggen</string>
     <string name="admin_logging_in">Bezig met inloggen…</string>
-    <string name="admin_back">Terug naar oefenen</string>
+    <string name="admin_back">Terug naar de app</string>
     
     <string name="admin_list_title">Te beoordelen (%1$d)</string>
     <string name="admin_list_refresh">Ververs</string>
@@ -346,4 +346,7 @@
     <string name="admin_msg_staff_not_found">Geen account met dit e-mailadres. Laat de docent eerst een account aanmaken.</string>
     <string name="admin_msg_error">Er ging iets mis. Controleer de invoer en probeer opnieuw.</string>
     <string name="admin_school_invalid">Vul een naam, een aantal plekken en een geldige datum (JJJJ-MM-DD) in.</string>
+    <string name="register_confirm_title">Check je e-mail</string>
+    <string name="register_confirm_desc">Je account is aangemaakt. We hebben een bevestigingslink gestuurd naar %1$s. Klik op de link in die mail en log daarna hier in. Geen mail gezien? Kijk ook in je spam.</string>
+    <string name="register_confirm_to_login">Naar inloggen</string>
 </resources>

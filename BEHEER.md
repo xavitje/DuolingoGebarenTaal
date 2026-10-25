@@ -76,6 +76,9 @@ select u.email, p.role, p.created_at
 1. **Profiel → Admin Panel → Scholen en licenties → Nieuwe school.** Vul naam, aantal
    leerlingplekken en de einddatum van de licentie in (JJJJ-MM-DD).
 2. Laat de docent zelf een account aanmaken in de app (gewoon registreren met e-mail).
+   **E-mailbevestiging staat aan**: de docent krijgt een mail met een link en moet daarop klikken
+   voordat hij kan inloggen. (Uitzetten kan in Supabase onder Authentication → Sign In / Providers →
+   Email → "Confirm email", maar voor scholen is aan laten veiliger.)
 3. Open de school en koppel de docent via zijn e-mailadres, als **Docent** of **Schoolbeheerder**.
 4. De docent logt uit en weer in en ziet dan het tabblad **Klas**.
 
@@ -230,6 +233,7 @@ Uitgevoerd tot nu toe:
 | `20260915202639_add_sign_language_support.sql` | Gebarentaal per gebaar/profiel | Ja |
 | `20261025000000_fase2_rollen.sql` | Rollen; bijdragen alleen voor vakmensen en admins | Ja, 25-10-2026 |
 | `20261025210000_fase3_scholen.sql` | Scholen, klassen, leerlingen, licenties | Nog niet |
+| `20261025230000_fase3_fix_rollen.sql` | Docentrol klopt ook zonder profielrij (na fase 3 uitvoeren) | Nog niet |
 
 Edge functions (Supabase → Edge Functions):
 
@@ -252,3 +256,8 @@ Edge functions (Supabase → Edge Functions):
 - Alles staat op branch **`fase-0-1-scholen`**, nog niet samengevoegd met `main`.
 
 Het volledige plan (fase 0 t/m 5) staat in het document "SignCoach — Implementatieplan voor scholen".
+
+
+
+E-mail: rafi.elidrissi@gmail.com
+Wachtwoord: N72Y0N940iASY7M2x54K

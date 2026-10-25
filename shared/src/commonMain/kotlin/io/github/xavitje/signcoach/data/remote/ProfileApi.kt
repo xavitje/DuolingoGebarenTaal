@@ -86,6 +86,22 @@ class ProfileApi(
         }
     }
 
+    /**
+     * Maakt een profielrij aan als die er nog niet is (bestaande rij blijft ongemoeid). Nodig
+     * omdat bij e-mailbevestiging de eerste sessie pas bij het eerste inloggen ontstaat, niet bij
+     * registreren — dan is er bij registreren nog geen profiel aangemaakt.
+     */
+    suspend fun ensureProfile(accessToken: String, userId: String, signLanguage: String = "ngt"): Result<Unit> = safeApiCall {
+        client.post("$baseUrl/rest/v1/profiles") {
+            header("apikey", anonKey)
+            header("Authorization", "Bearer $accessToken")
+            header("Prefer", "resolution=ignore-duplicates,return=minimal")
+            contentType(ContentType.Application.Json)
+            setBody(mapOf("id" to userId, "sign_language" to signLanguage))
+        }
+        Unit
+    }
+
     /** Werkt de actieve gebarentaal bij (instellingen -> taal wisselen). */
     suspend fun updateSignLanguage(accessToken: String, userId: String, signLanguage: String): Result<Unit> = safeApiCall {
         val response: HttpResponse = client.patch("$baseUrl/rest/v1/profiles") {

@@ -141,7 +141,7 @@
     <string name="admin_password">Password</string>
     <string name="admin_login_btn">Log in</string>
     <string name="admin_logging_in">Logging in…</string>
-    <string name="admin_back">Back to practice</string>
+    <string name="admin_back">Back to the app</string>
     
     <string name="admin_list_title">To review (%1$d)</string>
     <string name="admin_list_refresh">Refresh</string>
@@ -346,4 +346,7 @@
     <string name="admin_msg_staff_not_found">No account with this e-mail. Ask the teacher to create an account first.</string>
     <string name="admin_msg_error">Something went wrong. Check the input and try again.</string>
     <string name="admin_school_invalid">Enter a name, a number of seats and a valid date (YYYY-MM-DD).</string>
+    <string name="register_confirm_title">Check your e-mail</string>
+    <string name="register_confirm_desc">Your account has been created. We sent a confirmation link to %1$s. Click the link in that e-mail, then sign in here. No e-mail? Check your spam folder too.</string>
+    <string name="register_confirm_to_login">Go to sign in</string>
 </resources>

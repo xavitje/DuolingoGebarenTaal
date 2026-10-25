@@ -90,14 +90,33 @@ class SupabaseAuthApi(
         response.body<AuthSession>()
     }
 
-    /** Registreren met e-mail en wachtwoord. */
-    suspend fun signUp(email: String, password: String): Result<AuthSession> = safeApiCall {
+    /** Uitkomst van registreren: meteen een sessie, of eerst het e-mailadres bevestigen. */
+    sealed interface SignUpResult {
+        data class SignedIn(val session: AuthSession) : SignUpResult
+        /** E-mailbevestiging staat aan in Supabase: er is een mail met een link verstuurd en er
+         * komt pas een sessie na bevestigen + inloggen. */
+        data object ConfirmationRequired : SignUpResult
+    }
+
+    /**
+     * Registreren met e-mail en wachtwoord. Met e-mailbevestiging aan (Supabase → Authentication →
+     * Sign In / Providers → Confirm email) geeft Supabase géén sessie terug maar alleen een
+     * gebruiker; voorheen liep het uitlezen daarvan stuk en zag de gebruiker "netwerkfout".
+     */
+    suspend fun signUp(email: String, password: String): Result<SignUpResult> = safeApiCall {
         val response: HttpResponse = client.post("$baseUrl/auth/v1/signup") {
             header("apikey", anonKey)
             contentType(ContentType.Application.Json)
             setBody(mapOf("email" to email, "password" to password))
         }
-        response.body<AuthSession>()
+        val text = response.bodyAsText()
+        val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+        val obj = json.parseToJsonElement(text) as? kotlinx.serialization.json.JsonObject
+        if (obj != null && obj["access_token"] != null) {
+            SignUpResult.SignedIn(json.decodeFromString(AuthSession.serializer(), text))
+        } else {
+            SignUpResult.ConfirmationRequired
+        }
     }
 
     /** Uitloggen: invalideert het access-token server-side. */

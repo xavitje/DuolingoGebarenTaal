@@ -127,6 +127,21 @@ fun RegisterScreen(
                 )
                 Spacer(Modifier.height(32.dp))
 
+                // E-mailbevestiging staat aan: account is aangemaakt, eerst de link in de mail.
+                val sentTo = state.confirmationSentTo
+                if (sentTo != null) {
+                    Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), tonalElevation = 3.dp) {
+                        Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Text(stringResource(Res.string.register_confirm_title), style = MaterialTheme.typography.titleLarge)
+                            Text(stringResource(Res.string.register_confirm_desc, sentTo), style = MaterialTheme.typography.bodyMedium)
+                            Button(
+                                onClick = { viewModel.clearConfirmation(); onNavigateToLogin() },
+                                modifier = Modifier.fillMaxWidth().height(52.dp),
+                                shape = RoundedCornerShape(14.dp),
+                            ) { Text(stringResource(Res.string.register_confirm_to_login)) }
+                        }
+                    }
+                } else
                 Surface(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), tonalElevation = 3.dp) {
                     Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         Text(stringResource(Res.string.register_title), style = MaterialTheme.typography.titleLarge)

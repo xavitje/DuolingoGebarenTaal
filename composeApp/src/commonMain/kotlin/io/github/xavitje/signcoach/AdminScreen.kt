@@ -2,6 +2,7 @@ package io.github.xavitje.signcoach
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -55,6 +56,15 @@ fun AdminScreen(viewModel: AdminViewModel, onBack: () -> Unit, onOpenSchools: ()
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(Res.string.admin_title)) },
+                // Altijd een terugknop naar de app, ook vanuit de lijst en de crashrapporten.
+                navigationIcon = {
+                    androidx.compose.material3.IconButton(onClick = onBack) {
+                        androidx.compose.material3.Icon(
+                            androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(Res.string.coach_back),
+                        )
+                    }
+                },
                 colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
                     containerColor = io.github.xavitje.signcoach.ui.theme.Plum,
                 ),
