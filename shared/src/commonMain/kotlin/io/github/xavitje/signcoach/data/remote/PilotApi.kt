@@ -76,6 +76,7 @@ class PilotApi(
         @SerialName("has_demo_video") val hasDemoVideo: Boolean = false,
         val pending: Int = 0,
         val approved: Int = 0,
+        @SerialName("demo_pending") val demoPending: Int = 0,
     )
 
     /** Na een camera-oefening: gelukt (3 herhalingen) of opgegeven. Best-effort, fouten worden genegeerd. */

@@ -30,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -78,6 +79,14 @@ fun TeacherScreen(viewModel: TeacherViewModel) {
     var showNewClass by remember { mutableStateOf(false) }
     var showAddStudents by remember { mutableStateOf(false) }
     var confirmRemove by remember { mutableStateOf<SchoolApi.StudentProgress?>(null) }
+    var showFeedback by remember { mutableStateOf(false) }
+    if (showFeedback) {
+        FeedbackDialog(
+            busy = state.isBusy,
+            onDismiss = { showFeedback = false },
+            onSubmit = { answers -> viewModel.submitFeedback(answers); showFeedback = false },
+        )
+    }
 
     val selected = state.selectedClass
     PlatformBackHandler(enabled = selected != null) { viewModel.closeClass() }
@@ -136,6 +145,25 @@ fun TeacherScreen(viewModel: TeacherViewModel) {
                         item {
                             Text(school.schoolName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         }
+                        if (state.feedbackSent) {
+                            item {
+                                Card(shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
+                                    Row(Modifier.padding(start = 18.dp, end = 8.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        Text(stringResource(Res.string.feedback_thanks), modifier = Modifier.weight(1f), color = Clover)
+                                        TextButton(onClick = viewModel::dismissFeedbackThanks) { Text(stringResource(Res.string.teacher_done)) }
+                                    }
+                                }
+                            }
+                        } else if (state.feedbackDue) {
+                            item {
+                                Card(onClick = { showFeedback = true }, shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
+                                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Text(stringResource(Res.string.feedback_card_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                                        Text(stringResource(Res.string.feedback_card_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                }
+                            }
+                        }
                         state.weekStats.firstOrNull()?.let { week -> item { WeekStatsCard(week) } }
                         if (state.classes.isEmpty()) {
                             item { Text(stringResource(Res.string.teacher_no_classes), color = MaterialTheme.colorScheme.onSurfaceVariant) }
@@ -158,6 +186,11 @@ fun TeacherScreen(viewModel: TeacherViewModel) {
                                 Icon(Icons.Default.Add, contentDescription = null)
                                 Spacer(Modifier.height(0.dp))
                                 Text(stringResource(Res.string.teacher_new_class), modifier = Modifier.padding(start = 8.dp))
+                            }
+                        }
+                        item {
+                            TextButton(onClick = { showFeedback = true }, modifier = Modifier.fillMaxWidth()) {
+                                Text(stringResource(Res.string.feedback_give))
                             }
                         }
                     } else {
@@ -185,6 +218,15 @@ fun TeacherScreen(viewModel: TeacherViewModel) {
                                 shape = RoundedCornerShape(16.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = Coral, contentColor = Color.White),
                             ) { Text(stringResource(Res.string.teacher_add_students)) }
+                        }
+                        if (state.students.isNotEmpty()) {
+                            item {
+                                OutlinedButton(
+                                    onClick = { viewModel.printLoginCards() },
+                                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                                    shape = RoundedCornerShape(16.dp),
+                                ) { Text(stringResource(Res.string.teacher_print_cards)) }
+                            }
                         }
                         if (state.students.isEmpty() && !state.isBusy) {
                             item { Text(stringResource(Res.string.teacher_no_students), color = MaterialTheme.colorScheme.onSurfaceVariant) }
@@ -276,6 +318,7 @@ fun TeacherScreen(viewModel: TeacherViewModel) {
                 }
             },
             confirmButton = { TextButton(onClick = viewModel::dismissPins) { Text(stringResource(Res.string.teacher_done)) } },
+            dismissButton = { TextButton(onClick = { viewModel.printLoginCards() }) { Text(stringResource(Res.string.teacher_print_cards_short)) } },
         )
     }
 }
@@ -300,7 +343,16 @@ private fun StudentRow(
 ) {
     Card(shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(start = 18.dp, end = 8.dp, top = 14.dp, bottom = 4.dp)) {
-            Text(student.firstName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Row(Modifier.fillMaxWidth().padding(end = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(student.firstName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text(
+                    student.pin?.let { stringResource(Res.string.teacher_student_pin, it) } ?: stringResource(Res.string.teacher_student_pin_unknown),
+                    fontFamily = if (student.pin != null) FontFamily.Monospace else null,
+                    fontWeight = if (student.pin != null) FontWeight.Bold else null,
+                    color = if (student.pin != null) Gold else MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
             Text(
                 stringResource(Res.string.teacher_student_stats, student.completedLessons, student.totalXp, student.currentStreak),
                 color = if (student.completedLessons > 0) Clover else MaterialTheme.colorScheme.onSurfaceVariant,

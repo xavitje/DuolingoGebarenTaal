@@ -84,6 +84,9 @@ class SchoolApi(
         @SerialName("current_streak") val currentStreak: Int = 0,
         @SerialName("last_practice_date") val lastPracticeDate: String? = null,
         @SerialName("camera_allowed") val cameraAllowed: Boolean = true,
+        /** Pincode, altijd zichtbaar voor de docent. Null bij leerlingen van vóór deze functie:
+         * dan eenmalig "Nieuwe pincode" gebruiken. */
+        val pin: String? = null,
     )
 
     @Serializable

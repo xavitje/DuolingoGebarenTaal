@@ -85,10 +85,16 @@ select u.email, p.role, p.created_at
 ### Wat de docent doet
 
 1. **Klas → Nieuwe klas** (bijv. "Groep 7b"). De klas krijgt een klascode van 6 tekens.
-2. **Leerlingen toevoegen**: één voornaam per regel. De app toont daarna per leerling een
-   **pincode van 4 cijfers — maar één keer**. Opschrijven of uitprinten.
-3. Pincode kwijt? Bij de leerling op **Nieuwe pincode** tikken.
-4. Per leerling ziet de docent: gehaalde lessen, XP, dagen op rij en wanneer laatst geoefend.
+2. **Leerlingen toevoegen**: één voornaam per regel. Elke leerling krijgt een pincode van 4 cijfers.
+   De pincode staat **altijd** in de klaslijst (eigen keuze: geen gevoelig gegeven). Leerlingen van
+   vóór 26-10-2026 hebben nog geen zichtbare pincode: één keer **Nieuwe pincode** tikken.
+3. **Inlogkaartjes printen**: knop in de klas (en direct na het toevoegen). Opent het printvenster
+   van de tablet; "Opslaan als PDF" kan ook. Eén kaartje per leerling met klascode, naam en pincode.
+4. Per leerling ziet de docent: gehaalde lessen, XP, dagen op rij, wanneer laatst geoefend, en de
+   schakelaar voor de camera.
+5. **Feedback**: 14 dagen nadat een docent aan de school gekoppeld is verschijnt in het tabblad Klas
+   een vraag om feedback, daarna elke 4 weken. Er is ook altijd een knop **Feedback geven**. Jij leest
+   de antwoorden in Admin Panel → Scholen → open de school → **Feedback van docenten**.
 
 ### Hoe een leerling inlogt
 
@@ -208,7 +214,21 @@ Vakmensen dienen opnames in via **Profiel → Draag een gebaar bij**. Jij keurt 
 **Profiel → Admin Panel**. Na goedkeuring krijgen leerlingen dat gebaar bij de volgende start van de
 app met camera-herkenning.
 
-### Een demovideo koppelen aan een gebaar
+### Demovideo's: opnemen en beoordelen (in de app)
+
+1. Een vakman kiest bij **Draag een gebaar bij** een gebaar en dan **Demovideo voor leerlingen**.
+   Hij geeft toestemming (de video wordt aan leerlingen getoond), neemt 5 seconden op, kijkt terug
+   en verstuurt. Alleen op Android.
+2. De video komt in een wachtrij (privé-bucket `demo-review`). Leerlingen zien hem nog niet.
+3. Een **andere** vakman (of jij als admin) opent **Demovideo's van collega's beoordelen**, bekijkt
+   de video en kiest **Goedkeuren** of **Afkeuren** (met opmerking). Je eigen video's kun je niet
+   beoordelen; dat dwingt de server af.
+4. Goedgekeurd: de video gaat naar de openbare bucket `demo-videos` en staat meteen bij het gebaar.
+   Afgekeurd: de video wordt verwijderd.
+
+Wachtende video's in SQL: `select gesture_id, created_at from demo_videos where status = 'pending';`
+
+### Een demovideo met de hand koppelen (alternatief)
 
 ```sql
 update public.gestures
@@ -289,7 +309,8 @@ Uitgevoerd tot nu toe:
 | `20261025210000_fase3_scholen.sql` | Scholen, klassen, leerlingen, licenties | Ja |
 | `20261025230000_fase3_fix_rollen.sql` | Docentrol klopt ook zonder profielrij (na fase 3 uitvoeren) | Ja |
 | `20261026190000_fase4_privacy.sql` | Gegevens verwijderen bij account/licentie-einde, anonieme crashrapporten | Ja, 26-10-2026 |
-| `20261026210000_fase5_pilot.sql` | Camera per leerling, pilotmetingen, content-checklist, crashrapporten 12 maanden | Nog niet |
+| `20261026210000_fase5_pilot.sql` | Camera per leerling, pilotmetingen, content-checklist, crashrapporten 12 maanden | Ja |
+| `20261026230000_pincodes_feedback_demovideos.sql` | Pincodes zichtbaar, feedbackformulier, demovideo-wachtrij | Nog niet |
 
 Edge functions (Supabase → Edge Functions):
 
@@ -298,6 +319,7 @@ Edge functions (Supabase → Edge Functions):
 | `send-streak-reminders` | Dagelijkse herinnering | (bestond al) |
 | `school-students` | Leerlingen aanmaken, pincode resetten, verwijderen | Ja |
 | `student-login` | Inloggen met klascode + naam + pincode | Ja |
+| `review-demo-video` | Demovideo goed- of afkeuren (door een andere vakman) | Nog niet |
 
 ---
 

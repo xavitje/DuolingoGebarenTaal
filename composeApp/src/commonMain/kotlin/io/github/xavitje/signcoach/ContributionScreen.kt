@@ -14,6 +14,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,8 +52,34 @@ import io.github.xavitje.signcoach.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ContributionScreen(viewModel: ContributionViewModel, onBack: () -> Unit) {
+fun ContributionScreen(
+    viewModel: ContributionViewModel,
+    onBack: () -> Unit,
+    onRecordDemo: (SignTemplate) -> Unit = {},
+    onReviewDemos: () -> Unit = {},
+) {
     val state by viewModel.state.collectAsState()
+    // Na het kiezen van een gebaar: herkenningsopname of demovideo?
+    var chooseFor by remember { mutableStateOf<SignTemplate?>(null) }
+    chooseFor?.let { template ->
+        AlertDialog(
+            onDismissRequest = { chooseFor = null },
+            title = { Text(template.name) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(stringResource(Res.string.contrib_choose_desc))
+                    Button(onClick = { chooseFor = null; viewModel.selectGesture(template.id) }, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringResource(Res.string.contrib_choose_recognition))
+                    }
+                    OutlinedButton(onClick = { chooseFor = null; onRecordDemo(template) }, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringResource(Res.string.contrib_choose_demo))
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { chooseFor = null }) { Text(stringResource(Res.string.contrib_cancel)) } },
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -68,7 +99,7 @@ fun ContributionScreen(viewModel: ContributionViewModel, onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             when (state.step) {
-                ContributionStep.PICK_GESTURE -> GesturePickerStep(state.availableGestures, state.contentStatus, viewModel, onBack)
+                ContributionStep.PICK_GESTURE -> GesturePickerStep(state.availableGestures, state.contentStatus, viewModel, onBack, onPick = { chooseFor = it }, onReviewDemos = onReviewDemos)
                 ContributionStep.CONSENT -> ConsentStep(state.consentGiven, viewModel)
                 ContributionStep.COUNTDOWN -> CountdownStep(state.countdownSeconds)
                 ContributionStep.RECORDING -> RecordingStep(state.recordingProgress)
@@ -88,7 +119,13 @@ private fun GesturePickerStep(
     status: Map<String, io.github.xavitje.signcoach.data.remote.PilotApi.ContentStatus>,
     viewModel: ContributionViewModel,
     onBack: () -> Unit,
+    onPick: (SignTemplate) -> Unit,
+    onReviewDemos: () -> Unit,
 ) {
+    OutlinedButton(onClick = onReviewDemos, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+        val waiting = status.values.sumOf { it.demoPending }
+        Text(if (waiting > 0) stringResource(Res.string.contrib_review_demos_count, waiting) else stringResource(Res.string.contrib_review_demos))
+    }
     if (status.isNotEmpty()) {
         val ready = status.values.count { it.hasDemoVideo && it.approved >= ContributionViewModel.TARGET_APPROVED }
         Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
@@ -116,7 +153,7 @@ private fun GesturePickerStep(
         Text(stringResource(Res.string.contrib_picker_alphabet), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             letters.forEach { template ->
-                GestureChecklistRow(template, status[template.id]) { viewModel.selectGesture(template.id) }
+                GestureChecklistRow(template, status[template.id]) { onPick(template) }
             }
         }
     }
@@ -126,7 +163,7 @@ private fun GesturePickerStep(
         Text(stringResource(Res.string.contrib_picker_numbers), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             numbers.forEach { template ->
-                GestureChecklistRow(template, status[template.id]) { viewModel.selectGesture(template.id) }
+                GestureChecklistRow(template, status[template.id]) { onPick(template) }
             }
         }
     }
@@ -136,7 +173,7 @@ private fun GesturePickerStep(
         Text(stringResource(Res.string.contrib_picker_other), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             others.forEach { template ->
-                GestureChecklistRow(template, status[template.id]) { viewModel.selectGesture(template.id) }
+                GestureChecklistRow(template, status[template.id]) { onPick(template) }
             }
         }
     }
@@ -161,7 +198,13 @@ private fun GestureChecklistRow(
                     Text(
                         stringResource(
                             Res.string.contrib_checklist_line,
-                            stringResource(if (status.hasDemoVideo) Res.string.contrib_checklist_video_yes else Res.string.contrib_checklist_video_no),
+                            stringResource(
+                                when {
+                                    status.hasDemoVideo -> Res.string.contrib_checklist_video_yes
+                                    status.demoPending > 0 -> Res.string.contrib_checklist_video_pending
+                                    else -> Res.string.contrib_checklist_video_no
+                                },
+                            ),
                             status.approved,
                             ContributionViewModel.TARGET_APPROVED,
                             status.pending,

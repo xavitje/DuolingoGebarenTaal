@@ -55,6 +55,7 @@ private object Routes {
     const val SIGN_LANGUAGE_PICKER = "settings/sign_language"
     const val STUDENT_LOGIN = "auth/student"
     const val ADMIN_SCHOOLS = "admin/schools"
+    const val DEMO_VIDEO = "contribute/demo"
 }
 
 /**
@@ -95,6 +96,10 @@ fun AppNavigation(authViewModel: AuthViewModel) {
             sharedTemplates = templates
         }
     }
+
+    // Demovideo: het gekozen gebaar (null = beoordelen) en de namen van gebaren voor de wachtrij.
+    var demoTarget by remember { mutableStateOf<SignTemplate?>(null) }
+    var gestureNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
 
     NavHost(
         navController = navController,
@@ -271,12 +276,34 @@ fun AppNavigation(authViewModel: AuthViewModel) {
                     }
                 }
                 contributionViewModel.setAvailableGestures(allGestures)
+                gestureNames = allGestures.associate { it.id to it.name }
             }
             DisposableEffect(Unit) {
                 onDispose { /* ContributionViewModel heeft geen clear nodig */ }
             }
             ContributionScreen(
                 viewModel = contributionViewModel,
+                onBack = { navController.popBackStack() },
+                onRecordDemo = { template -> demoTarget = template; navController.navigate(Routes.DEMO_VIDEO) },
+                onReviewDemos = { demoTarget = null; navController.navigate(Routes.DEMO_VIDEO) },
+            )
+        }
+
+        composable(Routes.DEMO_VIDEO) {
+            if (!authState.canContribute) {
+                LaunchedEffect(Unit) { navController.popBackStack() }
+                return@composable
+            }
+            val target = demoTarget
+            val demoViewModel = remember(target?.id) {
+                io.github.xavitje.signcoach.presentation.DemoVideoViewModel(
+                    cameraController = PlatformCameraController(),
+                    signLanguage = activeSignLanguage,
+                ).also { vm -> if (target != null) vm.startForGesture(target.id, target.name) else vm.openQueue() }
+            }
+            io.github.xavitje.signcoach.ui.contribute.DemoVideoScreen(
+                viewModel = demoViewModel,
+                gestureNames = gestureNames,
                 onBack = { navController.popBackStack() },
             )
         }

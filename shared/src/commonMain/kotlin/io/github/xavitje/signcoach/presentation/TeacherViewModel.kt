@@ -1,7 +1,11 @@
 package io.github.xavitje.signcoach.presentation
 
 import io.github.xavitje.signcoach.data.local.SessionStore
+import io.github.xavitje.signcoach.data.remote.FeedbackApi
 import io.github.xavitje.signcoach.data.remote.SchoolApi
+import io.github.xavitje.signcoach.domain.print.LoginCard
+import io.github.xavitje.signcoach.domain.print.LoginCards
+import io.github.xavitje.signcoach.platform.printHtml
 import io.github.xavitje.signcoach.domain.AppError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,12 +32,17 @@ data class TeacherUiState(
     val seatsLeft: Int? = null,
     /** Pilotcijfers van de school, nieuwste week eerst (fase 5). */
     val weekStats: List<io.github.xavitje.signcoach.data.remote.PilotApi.WeekStats> = emptyList(),
+    /** Tijd voor het feedbackformulier (14 dagen na start, daarna elke 4 weken). */
+    val feedbackDue: Boolean = false,
+    /** Net feedback verstuurd: bedankje tonen. */
+    val feedbackSent: Boolean = false,
 )
 
 /** Tabblad "Klas" voor docenten en schoolbeheerders. */
 class TeacherViewModel(
     private val api: SchoolApi = SchoolApi(),
     private val pilotApi: io.github.xavitje.signcoach.data.remote.PilotApi = io.github.xavitje.signcoach.data.remote.PilotApi(),
+    private val feedbackApi: FeedbackApi = FeedbackApi(),
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) {
     private val _state = MutableStateFlow(TeacherUiState())
@@ -50,12 +59,14 @@ class TeacherViewModel(
                 api.myClasses(token).getOrNull()?.filter { it.schoolId == school.schoolId }
             } else emptyList()
             val stats = if (school != null) pilotApi.schoolStats(token, school.schoolId).getOrNull().orEmpty() else emptyList()
+            val due = school != null && feedbackApi.isDue(token).getOrDefault(false)
             _state.update {
                 it.copy(
                     isLoading = false,
                     school = school,
                     classes = classes ?: emptyList(),
                     weekStats = stats,
+                    feedbackDue = due,
                     error = if (classes == null) TeacherError.NETWORK else null,
                 )
             }
@@ -121,8 +132,9 @@ class TeacherViewModel(
         scope.launch {
             api.resetPin(token, schoolClass.id, student.userId)
                 .onSuccess { pin ->
-                    _state.update {
-                        it.copy(isBusy = false, newPins = listOf(SchoolApi.CreatedStudent(student.userId, student.firstName, pin)))
+                    // Pincodes staan altijd in de klaslijst: alleen de lijst bijwerken.
+                    _state.update { s ->
+                        s.copy(isBusy = false, students = s.students.map { if (it.userId == student.userId) it.copy(pin = pin) else it })
                     }
                 }
                 .onFailure { e -> _state.update { it.copy(isBusy = false).withError(e) } }
@@ -151,6 +163,28 @@ class TeacherViewModel(
             api.setStudentCamera(token, schoolClass.id, student.userId, allowed)
                 .onFailure { e -> _state.update { it.withError(e) }; refreshStudents() }
         }
+    }
+
+    /** Opent het printvenster met een inlogkaartje per leerling van de geopende klas. */
+    fun printLoginCards(): Boolean {
+        val schoolClass = _state.value.selectedClass ?: return false
+        val cards = _state.value.students.map { LoginCard(it.firstName, it.pin) }
+        if (cards.isEmpty()) return false
+        return printHtml("SignCoach inlogkaartjes ${schoolClass.name}", LoginCards.html(schoolClass.name, schoolClass.code, cards))
+    }
+
+    fun submitFeedback(answers: FeedbackApi.Answers) {
+        val token = token() ?: return
+        _state.update { it.copy(isBusy = true, error = null) }
+        scope.launch {
+            feedbackApi.submit(token, answers)
+                .onSuccess { _state.update { it.copy(isBusy = false, feedbackDue = false, feedbackSent = true) } }
+                .onFailure { e -> _state.update { it.copy(isBusy = false).withError(e) } }
+        }
+    }
+
+    fun dismissFeedbackThanks() {
+        _state.update { it.copy(feedbackSent = false) }
     }
 
     fun dismissPins() {

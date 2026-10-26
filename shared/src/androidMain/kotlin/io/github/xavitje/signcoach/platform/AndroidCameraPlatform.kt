@@ -8,6 +8,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
+import androidx.camera.video.FallbackStrategy
+import androidx.camera.video.Quality
+import androidx.camera.video.QualitySelector
+import androidx.camera.video.Recorder
+import androidx.camera.video.VideoCapture
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
@@ -143,35 +148,25 @@ object AndroidCameraPlatform {
                 val preview = Preview.Builder().build().also {
                     it.surfaceProvider = previewView.surfaceProvider
                 }
-                val imageAnalysis = ImageAnalysis.Builder()
-                    .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                    .build()
-                    .also { analysis ->
-                        analysis.setAnalyzer(cameraExecutor) { image ->
-                            val activeTracker = tracker
-                            if (activeTracker == null) image.close()
-                            else activeTracker.analyze(image, frontFacing)
-                        }
-                    }
+                val secondUseCase: androidx.camera.core.UseCase = if (videoMode) {
+                    val recorder = Recorder.Builder()
+                        .setQualitySelector(QualitySelector.from(Quality.HD, FallbackStrategy.lowerQualityOrHigherThan(Quality.SD)))
+                        .build()
+                    VideoCapture.withOutput(recorder).also { videoCapture = it }
+                } else imageAnalysisUseCase()
                 val preferredSelector = if (frontFacing) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
                 cameraProvider.unbindAll()
                 try {
-                    cameraProvider.bindToLifecycle(activity, preferredSelector, preview, imageAnalysis)
-                    Log.d(TAG, "bindCamera: CameraX bound successfully (preferred facing)")
+                    cameraProvider.bindToLifecycle(activity, preferredSelector, preview, secondUseCase)
+                    Log.d(TAG, "bindCamera: CameraX bound successfully (preferred facing, videoMode=$videoMode)")
                 } catch (e: IllegalArgumentException) {
-                    // Sommige emulators/AVD's registreren hun webcam-passthrough camera niet als
-                    // front-facing (of niet als back-facing), waardoor DEFAULT_FRONT_CAMERA /
-                    // DEFAULT_BACK_CAMERA geen match vindt. Val terug op de eerste camera die er
-                    // daadwerkelijk is, in plaats van helemaal niets te binden.
                     Log.w(TAG, "bindCamera: preferred facing not available, falling back to any available camera", e)
                     val fallbackInfo = cameraProvider.availableCameraInfos.firstOrNull()
                     if (fallbackInfo == null) {
                         Log.e(TAG, "bindCamera: no cameras available at all")
                     } else {
-                        val fallbackSelector = fallbackInfo.cameraSelector
                         cameraProvider.unbindAll()
-                        cameraProvider.bindToLifecycle(activity, fallbackSelector, preview, imageAnalysis)
+                        cameraProvider.bindToLifecycle(activity, fallbackInfo.cameraSelector, preview, secondUseCase)
                         Log.d(TAG, "bindCamera: CameraX bound successfully (fallback camera)")
                     }
                 }
@@ -183,8 +178,42 @@ object AndroidCameraPlatform {
         }, ContextCompat.getMainExecutor(activity))
     }
 
+    private fun imageAnalysisUseCase(): ImageAnalysis {
+        return ImageAnalysis.Builder()
+                    .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
+                    .also { analysis ->
+                        analysis.setAnalyzer(cameraExecutor) { image ->
+                            val activeTracker = tracker
+                            if (activeTracker == null) image.close()
+                            else activeTracker.analyze(image, frontFacing)
+                        }
+                    }
+    }
+
     private var bindInFlight = false
     private var permissionLauncher: (() -> Unit)? = null
+
+    /**
+     * Videomodus voor het opnemen van demovideo's door vakmensen: dan bindt de camera Preview +
+     * VideoCapture in plaats van Preview + ImageAnalysis (handtracking). Twee aparte combinaties,
+     * omdat goedkope tablets vaak geen drie use-cases tegelijk aankunnen.
+     */
+    @Volatile var videoMode: Boolean = false
+        private set
+    internal var videoCapture: VideoCapture<Recorder>? = null
+        private set
+
+    fun setVideoMode(enabled: Boolean) {
+        if (videoMode == enabled) return
+        videoMode = enabled
+        if (!enabled) videoCapture = null
+        // Opnieuw binden met de andere use-case, als er al een preview hangt.
+        boundPreviewView = null
+        boundFrontFacing = null
+        previewReference?.get()?.let { attachPreview(it, frontFacing) }
+    }
 }
 
 actual class PlatformCameraController actual constructor() : CameraController {

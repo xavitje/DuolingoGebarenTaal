@@ -116,6 +116,7 @@ fun AdminSchoolsScreen(viewModel: AdminSchoolsViewModel, onBack: () -> Unit) {
                     onPurge = viewModel::purgeSchoolData,
                     weekStats = state.weekStats,
                     gestureStats = state.gestureStats,
+                    feedback = state.feedback,
                 )
             }
         }
@@ -171,6 +172,7 @@ private fun SchoolDetail(
     onPurge: () -> Unit,
     weekStats: List<io.github.xavitje.signcoach.data.remote.PilotApi.WeekStats> = emptyList(),
     gestureStats: List<io.github.xavitje.signcoach.data.remote.PilotApi.GestureStats> = emptyList(),
+    feedback: List<io.github.xavitje.signcoach.data.remote.FeedbackApi.Entry> = emptyList(),
 ) {
     var confirmPurge by remember(school.id) { mutableStateOf(false) }
     var seats by remember(school.id) { mutableStateOf(school.maxStudents.toString()) }
@@ -254,6 +256,23 @@ private fun SchoolDetail(
                 hardest.forEach { g ->
                     Text(stringResource(Res.string.admin_pilot_gesture_line, g.gestureId, (g.successRate * 100).toInt(), g.attempts),
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+
+        Text(stringResource(Res.string.admin_feedback_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        if (feedback.isEmpty()) {
+            Text(stringResource(Res.string.admin_feedback_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        feedback.forEach { f ->
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("${f.createdAt.take(10)} · ${f.teacherEmail ?: "?"}", fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(Res.string.admin_feedback_scores, f.usage ?: "-", f.pupilsEnjoy ?: 0, f.recognition ?: 0, f.easeOfUse ?: 0, f.recommend ?: 0),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                    f.best?.let { Text(stringResource(Res.string.admin_feedback_best, it), style = MaterialTheme.typography.bodyMedium) }
+                    f.improve?.let { Text(stringResource(Res.string.admin_feedback_improve, it), style = MaterialTheme.typography.bodyMedium) }
+                    if (f.mayQuote) Text(stringResource(Res.string.admin_feedback_quote_ok), color = io.github.xavitje.signcoach.ui.theme.Clover, style = MaterialTheme.typography.bodySmall)
                 }
             }
         }

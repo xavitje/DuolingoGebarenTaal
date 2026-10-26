@@ -24,6 +24,8 @@ data class AdminSchoolsUiState(
     val weekStats: List<io.github.xavitje.signcoach.data.remote.PilotApi.WeekStats> = emptyList(),
     /** Herkenning per gebaar bij de geopende school, slechtst herkend eerst. */
     val gestureStats: List<io.github.xavitje.signcoach.data.remote.PilotApi.GestureStats> = emptyList(),
+    /** Feedback van docenten van de geopende school, nieuwste eerst. */
+    val feedback: List<io.github.xavitje.signcoach.data.remote.FeedbackApi.Entry> = emptyList(),
 )
 
 /** Beheerscherm voor scholen, licenties en docenten (alleen admins; de server controleert dat). */
@@ -73,7 +75,8 @@ class AdminSchoolsViewModel(
         scope.launch {
             val weeks = pilotApi.schoolStats(token, school.id).getOrNull().orEmpty()
             val gestures = pilotApi.gestureStats(token, school.id).getOrNull().orEmpty()
-            _state.update { if (it.selected?.id == school.id) it.copy(weekStats = weeks, gestureStats = gestures) else it }
+            val feedback = io.github.xavitje.signcoach.data.remote.FeedbackApi().forSchool(token, school.id).getOrNull().orEmpty()
+            _state.update { if (it.selected?.id == school.id) it.copy(weekStats = weeks, gestureStats = gestures, feedback = feedback) else it }
         }
     }
 
