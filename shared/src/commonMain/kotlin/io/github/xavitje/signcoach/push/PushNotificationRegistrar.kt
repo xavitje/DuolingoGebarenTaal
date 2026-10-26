@@ -15,6 +15,7 @@ class PushNotificationRegistrar(
 ) {
     suspend fun registerIfPossible() {
         val session = SessionStore.load() ?: return
+        if (isSchoolStudent(session.email)) return
         val token = FcmTokenProvider.getToken() ?: return
         runCatching {
             pushTokenApi.registerToken(
@@ -30,6 +31,7 @@ class PushNotificationRegistrar(
      * opnieuw bij FCM opgevraagd hoeft te worden. */
     suspend fun registerToken(token: String) {
         val session = SessionStore.load() ?: return
+        if (isSchoolStudent(session.email)) return
         runCatching {
             pushTokenApi.registerToken(
                 accessToken = session.accessToken,
@@ -39,4 +41,9 @@ class PushNotificationRegistrar(
             )
         }
     }
+
+    /** Schoolleerlingen krijgen geen pushberichten: de school bepaalt wanneer er geoefend wordt,
+     * en zo slaan we voor kinderen geen apparaat-token op (dataminimalisatie, fase 4). */
+    private fun isSchoolStudent(email: String?): Boolean =
+        io.github.xavitje.signcoach.data.remote.SchoolApi.isSchoolStudentEmail(email)
 }

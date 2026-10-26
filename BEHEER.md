@@ -130,6 +130,30 @@ select s.name, s.license_end, s.max_students,
 
 ---
 
+### Privacy: wat er met leerlinggegevens gebeurt
+
+- **Leerling verwijderen**: de docent doet dit in het tabblad Klas. Account, voortgang, badges en
+  pincode verdwijnen direct.
+- **Einde licentie**: 90 dagen na de einddatum worden alle leerlingaccounts, voortgang en klassen
+  van die school automatisch gewist (dagelijkse taak, zie hieronder). De school zelf, de
+  licentiegegevens en de docentaccounts blijven bestaan; docenten zien de school daarna niet meer.
+- **School vraagt eerder om verwijdering**: Admin Panel → Scholen → open de school →
+  **Leerlinggegevens verwijderen**. Dit kan niet ongedaan worden gemaakt.
+- **Crashrapporten** zijn anoniem: geen gebruikers-ID, en e-mailadressen, ID's en tokens worden er in
+  de app uit gehaald voordat ze verstuurd worden.
+- **Pushmeldingen** krijgen leerlingen niet; er wordt voor hen geen apparaat-token opgeslagen.
+- **Camerabeelden** van leerlingen verlaten het apparaat nooit. Alleen "gebaar X gehaald" en XP gaan
+  naar de server. Alleen vakmensen sturen beelden in, bij het bijdragen van een gebaar.
+
+**Dagelijkse opschoontaak instellen (eenmalig):** zet in Supabase onder Database → Extensions
+`pg_cron` aan en voer dan in de SQL Editor uit:
+
+```sql
+select cron.schedule('purge-expired-schools', '17 3 * * *', $$select public.purge_expired_schools()$$);
+```
+
+Controleren: `select * from cron.job;`
+
 ## 3. Content: gebaren en lessen
 
 ### Hoe een les open of dicht staat
@@ -232,26 +256,27 @@ Uitgevoerd tot nu toe:
 | --- | --- | --- |
 | `20260915202639_add_sign_language_support.sql` | Gebarentaal per gebaar/profiel | Ja |
 | `20261025000000_fase2_rollen.sql` | Rollen; bijdragen alleen voor vakmensen en admins | Ja, 25-10-2026 |
-| `20261025210000_fase3_scholen.sql` | Scholen, klassen, leerlingen, licenties | Nog niet |
-| `20261025230000_fase3_fix_rollen.sql` | Docentrol klopt ook zonder profielrij (na fase 3 uitvoeren) | Nog niet |
+| `20261025210000_fase3_scholen.sql` | Scholen, klassen, leerlingen, licenties | Ja |
+| `20261025230000_fase3_fix_rollen.sql` | Docentrol klopt ook zonder profielrij (na fase 3 uitvoeren) | Ja |
+| `20261026190000_fase4_privacy.sql` | Gegevens verwijderen bij account/licentie-einde, anonieme crashrapporten | Nog niet |
 
 Edge functions (Supabase → Edge Functions):
 
 | Functie | Wat | Gedeployd |
 | --- | --- | --- |
 | `send-streak-reminders` | Dagelijkse herinnering | (bestond al) |
-| `school-students` | Leerlingen aanmaken, pincode resetten, verwijderen | Nog niet |
-| `student-login` | Inloggen met klascode + naam + pincode | Nog niet |
+| `school-students` | Leerlingen aanmaken, pincode resetten, verwijderen | Ja |
+| `student-login` | Inloggen met klascode + naam + pincode | Ja |
 
 ---
 
 ## 6. Bekende open punten
 
-- **Test `GestureScorerTest` faalt al** (score-berekening van de herkenning). De CI op GitHub
-  (`./gradlew test`) is daardoor rood tot dit is opgelost.
 - **iOS** is geschreven maar nooit gebouwd of getest (zie `IOS_SETUP.md`). Veel scholen gebruiken iPads.
-- **Privacybeleid** in de app is nog de tekst voor losse gebruikers; die wordt herschreven voor
-  scholen (fase 4).
+- **Privacydocumenten** voor scholen (verwerkersovereenkomst, privacybijsluiter, beveiligingsbijlage,
+  DPIA) moeten nog gemaakt en door een privacyjurist nagekeken worden.
+- **Supabase-regio**: het privacybeleid zegt "EU (Frankfurt)". Controleer dit in Supabase onder
+  Project Settings → General → Region.
 - **Lokale app-database** is bij fase 0 naar schemaversie 3 gegaan (bijhouden van gehaalde lessen).
 - Alles staat op branch **`fase-0-1-scholen`**, nog niet samengevoegd met `main`.
 

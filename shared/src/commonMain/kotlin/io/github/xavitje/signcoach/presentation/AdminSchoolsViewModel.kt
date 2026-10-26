@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class AdminSchoolsMessage { SAVED, STAFF_ADDED, STAFF_NOT_FOUND, ERROR }
+enum class AdminSchoolsMessage { SAVED, STAFF_ADDED, STAFF_NOT_FOUND, PURGED, ERROR }
 
 data class AdminSchoolsUiState(
     val isLoading: Boolean = true,
@@ -109,6 +109,18 @@ class AdminSchoolsViewModel(
             api.adminRemoveStaff(token, school.id, member.userId)
                 .onSuccess { loadStaff(); load() }
                 .onFailure { _state.update { it.copy(message = AdminSchoolsMessage.ERROR) } }
+        }
+    }
+
+    /** Wist alle leerlinggegevens van de geopende school. Onomkeerbaar; de UI vraagt eerst om bevestiging. */
+    fun purgeSchoolData() {
+        val token = token() ?: return
+        val school = _state.value.selected ?: return
+        _state.update { it.copy(isBusy = true) }
+        scope.launch {
+            api.adminPurgeSchool(token, school.id)
+                .onSuccess { _state.update { it.copy(isBusy = false, message = AdminSchoolsMessage.PURGED) }; loadStaff(); load() }
+                .onFailure { _state.update { it.copy(isBusy = false, message = AdminSchoolsMessage.ERROR) } }
         }
     }
 

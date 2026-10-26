@@ -146,6 +146,8 @@ class SchoolApi(
         @SerialName("p_email") val email: String,
         @SerialName("p_staff_role") val staffRole: String,
     )
+    @Serializable private data class SchoolIdArgs(@SerialName("p_school_id") val schoolId: String)
+
     @Serializable private data class RemoveStaffArgs(
         @SerialName("p_school_id") val schoolId: String,
         @SerialName("p_user_id") val userId: String,
@@ -289,6 +291,16 @@ class SchoolApi(
             contentType(ContentType.Application.Json)
             setBody(AddStaffArgs(schoolId, email.trim(), staffRole))
         }.bodyAsText().trim().trim('"')
+    }
+
+    /** Wist alle leerlingaccounts, voortgang en klassen van een school (RPC admin_purge_school).
+     * Geeft het aantal verwijderde leerlingaccounts terug. */
+    suspend fun adminPurgeSchool(accessToken: String, schoolId: String): Result<Int> = safeApiCall {
+        client.post("$baseUrl/rest/v1/rpc/admin_purge_school") {
+            auth(accessToken)
+            contentType(ContentType.Application.Json)
+            setBody(SchoolIdArgs(schoolId))
+        }.bodyAsText().trim().toIntOrNull() ?: 0
     }
 
     suspend fun adminRemoveStaff(accessToken: String, schoolId: String, userId: String): Result<Unit> = safeApiCall {

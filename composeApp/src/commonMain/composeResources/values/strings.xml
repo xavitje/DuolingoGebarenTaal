@@ -348,6 +348,12 @@
     <string name="admin_msg_saved">Opgeslagen</string>
     <string name="admin_msg_staff_added">Gekoppeld. De docent moet opnieuw inloggen.</string>
     <string name="admin_msg_staff_not_found">Geen account met dit e-mailadres. Laat de docent eerst een account aanmaken.</string>
+    <string name="admin_msg_purged">Leerlinggegevens van deze school zijn verwijderd</string>
+    <string name="admin_school_privacy_title">Privacy</string>
+    <string name="admin_school_privacy_desc">Leerlinggegevens worden automatisch 90 dagen na het einde van de licentie verwijderd. Vraagt een school eerder om verwijdering, gebruik dan deze knop.</string>
+    <string name="admin_school_purge">Leerlinggegevens verwijderen</string>
+    <string name="admin_school_purge_confirm_title">Alles van deze school verwijderen?</string>
+    <string name="admin_school_purge_confirm_text">Alle leerlingaccounts, voortgang en klassen van %1$s worden definitief verwijderd en docenten verliezen hun toegang. De school zelf en de licentiegegevens blijven bestaan. Dit kan niet ongedaan worden gemaakt.</string>
     <string name="admin_msg_error">Er ging iets mis. Controleer de invoer en probeer opnieuw.</string>
     <string name="admin_school_invalid">Vul een naam, een aantal plekken en een geldige datum (JJJJ-MM-DD) in.</string>
     <string name="register_confirm_title">Check je e-mail</string>

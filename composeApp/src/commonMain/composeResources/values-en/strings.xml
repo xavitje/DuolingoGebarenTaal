@@ -348,6 +348,12 @@
     <string name="admin_msg_saved">Saved</string>
     <string name="admin_msg_staff_added">Linked. The teacher needs to sign in again.</string>
     <string name="admin_msg_staff_not_found">No account with this e-mail. Ask the teacher to create an account first.</string>
+    <string name="admin_msg_purged">Student data for this school has been deleted</string>
+    <string name="admin_school_privacy_title">Privacy</string>
+    <string name="admin_school_privacy_desc">Student data is deleted automatically 90 days after the licence ends. If a school asks for deletion earlier, use this button.</string>
+    <string name="admin_school_purge">Delete student data</string>
+    <string name="admin_school_purge_confirm_title">Delete everything for this school?</string>
+    <string name="admin_school_purge_confirm_text">All student accounts, progress and classes of %1$s will be permanently deleted and teachers lose access. The school and its licence details remain. This cannot be undone.</string>
     <string name="admin_msg_error">Something went wrong. Check the input and try again.</string>
     <string name="admin_school_invalid">Enter a name, a number of seats and a valid date (YYYY-MM-DD).</string>
     <string name="register_confirm_title">Check your e-mail</string>

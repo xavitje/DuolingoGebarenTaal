@@ -70,13 +70,15 @@ class CrashReportRepository(
 }
 
 private fun PendingCrashReport.toBody(): CrashReportApi.CrashReportBody = CrashReportApi.CrashReportBody(
-    userId = userId,
+    // Geen gebruikers-ID en geen persoonsgegevens in de tekst: crashrapporten moeten anoniem
+    // zijn (privacybijsluiter scholen). Voor het oplossen van een crash is de stacktrace genoeg.
+    userId = null,
     platform = platform,
     appVersion = appVersion,
     osVersion = osVersion,
     deviceModel = deviceModel,
     errorType = errorType,
-    errorMessage = errorMessage,
-    stackTrace = stackTrace,
+    errorMessage = io.github.xavitje.signcoach.domain.privacy.PrivacyScrubber.scrub(errorMessage),
+    stackTrace = io.github.xavitje.signcoach.domain.privacy.PrivacyScrubber.scrubNonNull(stackTrace),
     isFatal = isFatal == 1L,
 )

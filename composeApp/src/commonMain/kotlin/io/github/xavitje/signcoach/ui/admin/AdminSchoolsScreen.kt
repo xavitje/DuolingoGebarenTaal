@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -76,6 +77,7 @@ fun AdminSchoolsScreen(viewModel: AdminSchoolsViewModel, onBack: () -> Unit) {
                     AdminSchoolsMessage.SAVED -> Res.string.admin_msg_saved
                     AdminSchoolsMessage.STAFF_ADDED -> Res.string.admin_msg_staff_added
                     AdminSchoolsMessage.STAFF_NOT_FOUND -> Res.string.admin_msg_staff_not_found
+                    AdminSchoolsMessage.PURGED -> Res.string.admin_msg_purged
                     AdminSchoolsMessage.ERROR -> Res.string.admin_msg_error
                 }
             )
@@ -111,6 +113,7 @@ fun AdminSchoolsScreen(viewModel: AdminSchoolsViewModel, onBack: () -> Unit) {
                     onSaveLicense = viewModel::updateLicense,
                     onAddStaff = viewModel::addStaff,
                     onRemoveStaff = viewModel::removeStaff,
+                    onPurge = viewModel::purgeSchoolData,
                 )
             }
         }
@@ -163,7 +166,9 @@ private fun SchoolDetail(
     onSaveLicense: (Int, String) -> Unit,
     onAddStaff: (String, String) -> Unit,
     onRemoveStaff: (SchoolApi.StaffMember) -> Unit,
+    onPurge: () -> Unit,
 ) {
+    var confirmPurge by remember(school.id) { mutableStateOf(false) }
     var seats by remember(school.id) { mutableStateOf(school.maxStudents.toString()) }
     var end by remember(school.id) { mutableStateOf(school.licenseEnd) }
     var email by remember(school.id) { mutableStateOf("") }
@@ -220,6 +225,28 @@ private fun SchoolDetail(
         Button(onClick = { onAddStaff(email, role); email = "" }, enabled = email.contains('@') && !busy, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(Res.string.admin_school_add_staff))
         }
+
+        Text(stringResource(Res.string.admin_school_privacy_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Text(stringResource(Res.string.admin_school_privacy_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        OutlinedButton(onClick = { confirmPurge = true }, enabled = !busy, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(Res.string.admin_school_purge), color = MaterialTheme.colorScheme.error)
+        }
+    }
+
+    if (confirmPurge) {
+        AlertDialog(
+            onDismissRequest = { confirmPurge = false },
+            title = { Text(stringResource(Res.string.admin_school_purge_confirm_title)) },
+            text = { Text(stringResource(Res.string.admin_school_purge_confirm_text, school.name)) },
+            confirmButton = {
+                TextButton(onClick = { confirmPurge = false; onPurge() }) {
+                    Text(stringResource(Res.string.admin_school_purge), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmPurge = false }) { Text(stringResource(Res.string.contrib_cancel)) }
+            },
+        )
     }
 }
 

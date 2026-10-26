@@ -62,7 +62,7 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                "Laatst bijgewerkt: september 2026",
+                "Laatst bijgewerkt: oktober 2026",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -73,6 +73,20 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
                     "(geen bedrijf/rechtspersoon). Voor alle vragen over je gegevens of dit " +
                     "privacybeleid kun je contact opnemen via:\n\n" +
                     "E-mail: contact@rafimaaktwebsites.nl",
+            )
+
+            Section(
+                title = "Gebruik je SignCoach via school?",
+                body = "Dan is je school verantwoordelijk voor je gegevens (verwerkingsverantwoordelijke) " +
+                    "en verwerkt SignCoach ze alleen in opdracht van de school, volgens een " +
+                    "verwerkersovereenkomst op basis van het Convenant Digitale Onderwijsmiddelen en " +
+                    "Privacy. Met vragen kun je ook bij je school terecht.\n\n" +
+                    "Van leerlingen bewaren we alleen: voornaam of bijnaam, klas, een versleutelde " +
+                    "pincode, en voortgang (welke gebaren gehaald zijn, XP en reeks). Geen e-mailadres, " +
+                    "achternaam of geboortedatum. Je docent ziet alleen de voortgang van zijn eigen klas.\n\n" +
+                    "Leerlingen krijgen geen pushmeldingen. Je docent kan je account met alle gegevens " +
+                    "verwijderen. Stopt de licentie van je school, dan worden alle leerlinggegevens van " +
+                    "die school uiterlijk 90 dagen na het einde van de licentie automatisch gewist.",
             )
 
             Section(
@@ -93,11 +107,13 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
                     "beoordeeld vóór gebruik. Dit gebeurt alleen als je hier zelf voor kiest.\n\n" +
                     "• Crashrapporten: als de app onverwacht vastloopt, wordt automatisch een " +
                     "technisch rapport opgeslagen (foutmelding, stack trace, apparaatmodel, " +
-                    "besturingssysteemversie, app-versie, en — als je ingelogd was — je gebruikers-ID). " +
-                    "Dit helpt ons de app te verbeteren en bevat geen inhoud van je oefeningen.\n\n" +
+                    "besturingssysteemversie en app-versie). Het rapport is anoniem: er gaat geen " +
+                    "gebruikers-ID mee, en e-mailadressen en andere herkenbare gegevens worden er " +
+                    "automatisch uit verwijderd voordat het verstuurd wordt.\n\n" +
                     "• Pushmeldingstoken: als je toestemming geeft voor meldingen, slaan we een " +
                     "technisch \"devicetoken\" op (via Firebase Cloud Messaging) om je een " +
-                    "herinnering te kunnen sturen als je een dag niet geoefend hebt.",
+                    "herinnering te kunnen sturen als je een dag niet geoefend hebt. Dit geldt niet voor " +
+                    "leerlingen die via school inloggen.",
             )
 
             Section(
@@ -131,7 +147,9 @@ fun PrivacyPolicyScreen(onBack: () -> Unit) {
                     "verwijderen), dan worden je profiel- en voortgangsgegevens verwijderd. " +
                     "Crashrapporten die al verstuurd zijn kunnen nog een beperkte periode bewaard " +
                     "blijven voor technische analyse, zonder dat deze nog aan jou te koppelen zijn " +
-                    "zodra je account weg is.",
+                    "zodra je account weg is.\n\n" +
+                    "Accounts via school: tot de docent het account verwijdert, of uiterlijk 90 dagen " +
+                    "na het einde van de schoollicentie.",
             )
 
             Section(
