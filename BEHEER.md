@@ -281,8 +281,3 @@ Edge functions (Supabase → Edge Functions):
 - Alles staat op branch **`fase-0-1-scholen`**, nog niet samengevoegd met `main`.
 
 Het volledige plan (fase 0 t/m 5) staat in het document "SignCoach — Implementatieplan voor scholen".
-
-
-
-E-mail: rafi.elidrissi@gmail.com
-Wachtwoord: N72Y0N940iASY7M2x54K
