@@ -203,6 +203,12 @@
     <string name="contrib_review_desc">Dit is een beeld uit je opname. Staat je hand volledig en scherp in beeld, en is de handvorm goed? Verstuur hem dan naar de beoordelaar. Anders neem je hem gewoon opnieuw op.</string>
     <string name="contrib_review_retake">Opnieuw opnemen</string>
     <string name="contrib_review_send">Versturen</string>
+    <string name="contrib_checklist_summary">%1$d van %2$d gebaren compleet</string>
+    <string name="contrib_checklist_rule">Compleet = een demovideo en minstens %1$d goedgekeurde opnames, liefst van verschillende mensen.</string>
+    <string name="contrib_checklist_line">Video: %1$s · goedgekeurd %2$d/%3$d · wacht op beoordeling: %4$d</string>
+    <string name="contrib_checklist_video_yes">ja</string>
+    <string name="contrib_checklist_video_no">nee</string>
+    <string name="contrib_checklist_done">Compleet</string>
     <string name="contrib_uploading">Bijdrage versturen…</string>
     
     <string name="contrib_success_title">Bedankt voor je bijdrage!</string>
@@ -354,6 +360,20 @@
     <string name="admin_school_purge">Leerlinggegevens verwijderen</string>
     <string name="admin_school_purge_confirm_title">Alles van deze school verwijderen?</string>
     <string name="admin_school_purge_confirm_text">Alle leerlingaccounts, voortgang en klassen van %1$s worden definitief verwijderd en docenten verliezen hun toegang. De school zelf en de licentiegegevens blijven bestaan. Dit kan niet ongedaan worden gemaakt.</string>
+    <string name="admin_pilot_title">Pilotcijfers</string>
+    <string name="admin_pilot_empty">Nog geen oefeningen gemeten bij deze school.</string>
+    <string name="admin_pilot_col_week">Week van</string>
+    <string name="admin_pilot_col_active">Actief</string>
+    <string name="admin_pilot_col_done">Gehaald</string>
+    <string name="admin_pilot_col_rate">Herkend</string>
+    <string name="admin_pilot_hardest">Moeilijkst herkend (laatste 8 weken)</string>
+    <string name="admin_pilot_gesture_line">%1$s: %2$d%% gelukt bij %3$d pogingen</string>
+    <string name="teacher_week_title">Deze week</string>
+    <string name="teacher_week_active">%1$d van de %2$d leerlingen hebben geoefend</string>
+    <string name="teacher_week_done">%1$d gebaren gehaald met de camera</string>
+    <string name="teacher_camera">Oefenen met camera</string>
+    <string name="teacher_camera_on">Aan: de app kijkt mee en geeft feedback</string>
+    <string name="teacher_camera_off">Uit: de leerling kijkt de voorbeelden en vinkt zelf af</string>
     <string name="admin_msg_error">Er ging iets mis. Controleer de invoer en probeer opnieuw.</string>
     <string name="admin_school_invalid">Vul een naam, een aantal plekken en een geldige datum (JJJJ-MM-DD) in.</string>
     <string name="register_confirm_title">Check je e-mail</string>

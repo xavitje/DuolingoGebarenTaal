@@ -1,5 +1,7 @@
 package io.github.xavitje.signcoach.presentation
 
+import io.github.xavitje.signcoach.data.local.SessionStore
+
 import io.github.xavitje.signcoach.data.remote.SchoolApi
 import io.github.xavitje.signcoach.domain.AppError
 import kotlinx.coroutines.CoroutineScope
@@ -37,7 +39,13 @@ class StudentLoginViewModel(
     private val _state = MutableStateFlow(StudentLoginUiState())
     val state: StateFlow<StudentLoginUiState> = _state.asStateFlow()
 
-    fun submitCode(code: String) {
+    init {
+        // Op een gedeelde klastablet onthouden we de klascode: de volgende leerling begint
+        // direct bij "kies je naam". Via "terug" kan altijd een andere code ingevuld worden.
+        SessionStore.getLastClassCode()?.let { submitCode(it, remembered = true) }
+    }
+
+    fun submitCode(code: String, remembered: Boolean = false) {
         val clean = code.trim().uppercase()
         if (clean.length != 6) {
             _state.update { it.copy(error = StudentLoginError.INVALID_CODE) }
@@ -48,11 +56,15 @@ class StudentLoginViewModel(
             api.classRoster(clean)
                 .onSuccess { roster ->
                     _state.update {
-                        if (roster.isEmpty()) it.copy(isLoading = false, error = StudentLoginError.INVALID_CODE)
+                        if (roster.isEmpty() && remembered) {
+                            // Onthouden klas bestaat niet meer (bv. nieuw schooljaar): stil vergeten.
+                            SessionStore.setLastClassCode(null)
+                            it.copy(isLoading = false, classCode = "")
+                        } else if (roster.isEmpty()) it.copy(isLoading = false, error = StudentLoginError.INVALID_CODE)
                         else it.copy(isLoading = false, roster = roster, step = StudentLoginStep.NAME)
                     }
                 }
-                .onFailure { _state.update { it.copy(isLoading = false, error = StudentLoginError.NETWORK) } }
+                .onFailure { _state.update { it.copy(isLoading = false, error = if (remembered) null else StudentLoginError.NETWORK) } }
         }
     }
 
@@ -89,6 +101,7 @@ class StudentLoginViewModel(
         scope.launch {
             api.studentLogin(s.classCode, student.userId, pin)
                 .onSuccess { session ->
+                    SessionStore.setLastClassCode(s.classCode)
                     authViewModel.completeExternalLogin(session)
                     _state.update { it.copy(isLoading = false) }
                 }

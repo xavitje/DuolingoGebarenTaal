@@ -96,6 +96,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        io.github.xavitje.signcoach.presentation.StudentIdleGuard.onAppForegrounded()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Niet bij een recreate (taalwissel, draaien): dan is de app niet echt weg.
+        if (!isChangingConfigurations) io.github.xavitje.signcoach.presentation.StudentIdleGuard.onAppBackgrounded()
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)

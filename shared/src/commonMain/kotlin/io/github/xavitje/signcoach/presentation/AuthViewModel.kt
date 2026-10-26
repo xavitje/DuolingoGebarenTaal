@@ -99,7 +99,12 @@ class AuthViewModel(
     val state: StateFlow<AuthUiState> = _state.asStateFlow()
 
     init {
+        // Leerling op een gedeelde tablet die te lang weg was: niet automatisch terug in zijn account.
+        StudentIdleGuard.expireIfIdle()
         restoreSession()
+        scope.launch {
+            StudentIdleGuard.expired.collect { _state.update { AuthUiState(status = AuthStatus.LOGGED_OUT) } }
+        }
     }
 
     // ─── Sessie herstel bij app-start ────────────────────────────────────────

@@ -130,6 +130,28 @@ select s.name, s.license_end, s.max_students,
 
 ---
 
+### Gedeelde tablets
+
+Een leerling wordt automatisch uitgelogd als de app langer dan 10 minuten op de achtergrond stond
+of afgesloten was. De klascode blijft op het apparaat onthouden, dus de volgende leerling kiest
+meteen zijn naam en typt zijn pincode. Docenten blijven gewoon ingelogd.
+
+### Oefenen zonder camera
+
+In het tabblad Klas staat bij elke leerling een schakelaar **Oefenen met camera**. Staat die uit
+(bijvoorbeeld omdat ouders geen camera willen), dan kijkt de leerling de voorbeelden en vinkt hij
+zelf af dat het gelukt is. Er wordt dan niets met de camera gedaan.
+
+### Pilotcijfers
+
+- **Docent**: bovenaan het tabblad Klas staat hoeveel leerlingen deze week geoefend hebben en hoeveel
+  gebaren er met de camera gehaald zijn.
+- **Jij**: Admin Panel → Scholen → open een school → **Pilotcijfers**: per week het aantal actieve
+  leerlingen, gehaalde gebaren en hoe vaak de herkenning lukt, plus welke gebaren het slechtst
+  herkend worden. Dat laatste vertelt je welke gebaren meer of betere opnames nodig hebben.
+- Gemeten wordt anoniem per gebaar per school per dag. Per leerling wordt alleen bijgehouden op
+  welke dagen er geoefend is.
+
 ### Privacy: wat er met leerlinggegevens gebeurt
 
 - **Leerling verwijderen**: de docent doet dit in het tabblad Klas. Account, voortgang, badges en
@@ -145,7 +167,9 @@ select s.name, s.license_end, s.max_students,
 - **Camerabeelden** van leerlingen verlaten het apparaat nooit. Alleen "gebaar X gehaald" en XP gaan
   naar de server. Alleen vakmensen sturen beelden in, bij het bijdragen van een gebaar.
 
-**Dagelijkse opschoontaak instellen (eenmalig):** zet in Supabase onder Database → Extensions
+De dagelijkse taak ruimt ook crashrapporten ouder dan 12 maanden op.
+
+**Dagelijkse opschoontaak instellen (eenmalig, al gedaan op 26-10-2026):** zet in Supabase onder Database → Extensions
 `pg_cron` aan en voer dan in de SQL Editor uit:
 
 ```sql
@@ -171,6 +195,12 @@ Controleren: `select * from cron.job;`
 | Een goedgekeurde opname (herkenning) | Demovideo (indien aanwezig), daarna oefenen met de camera |
 | Alleen een demovideo | Demovideo, daarna zelfcheck ("Gelukt!" / "Nog een keer kijken") |
 | Niets | Klokje "komt binnenkort" |
+
+### Welke gebaren zijn al compleet? (checklist voor vakmensen)
+
+Bij **Draag een gebaar bij** ziet een vakman per gebaar: of er een demovideo is, hoeveel opnames
+er goedgekeurd zijn (doel: 6) en hoeveel er nog op beoordeling wachten. Bovenaan staat hoeveel
+gebaren compleet zijn. Compleet = demovideo plus minstens 6 goedgekeurde opnames.
 
 ### Een opname goedkeuren
 
@@ -258,7 +288,8 @@ Uitgevoerd tot nu toe:
 | `20261025000000_fase2_rollen.sql` | Rollen; bijdragen alleen voor vakmensen en admins | Ja, 25-10-2026 |
 | `20261025210000_fase3_scholen.sql` | Scholen, klassen, leerlingen, licenties | Ja |
 | `20261025230000_fase3_fix_rollen.sql` | Docentrol klopt ook zonder profielrij (na fase 3 uitvoeren) | Ja |
-| `20261026190000_fase4_privacy.sql` | Gegevens verwijderen bij account/licentie-einde, anonieme crashrapporten | Nog niet |
+| `20261026190000_fase4_privacy.sql` | Gegevens verwijderen bij account/licentie-einde, anonieme crashrapporten | Ja, 26-10-2026 |
+| `20261026210000_fase5_pilot.sql` | Camera per leerling, pilotmetingen, content-checklist, crashrapporten 12 maanden | Nog niet |
 
 Edge functions (Supabase → Edge Functions):
 

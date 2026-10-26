@@ -114,6 +114,8 @@ fun AdminSchoolsScreen(viewModel: AdminSchoolsViewModel, onBack: () -> Unit) {
                     onAddStaff = viewModel::addStaff,
                     onRemoveStaff = viewModel::removeStaff,
                     onPurge = viewModel::purgeSchoolData,
+                    weekStats = state.weekStats,
+                    gestureStats = state.gestureStats,
                 )
             }
         }
@@ -167,6 +169,8 @@ private fun SchoolDetail(
     onAddStaff: (String, String) -> Unit,
     onRemoveStaff: (SchoolApi.StaffMember) -> Unit,
     onPurge: () -> Unit,
+    weekStats: List<io.github.xavitje.signcoach.data.remote.PilotApi.WeekStats> = emptyList(),
+    gestureStats: List<io.github.xavitje.signcoach.data.remote.PilotApi.GestureStats> = emptyList(),
 ) {
     var confirmPurge by remember(school.id) { mutableStateOf(false) }
     var seats by remember(school.id) { mutableStateOf(school.maxStudents.toString()) }
@@ -224,6 +228,34 @@ private fun SchoolDetail(
         }
         Button(onClick = { onAddStaff(email, role); email = "" }, enabled = email.contains('@') && !busy, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(Res.string.admin_school_add_staff))
+        }
+
+        Text(stringResource(Res.string.admin_pilot_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        if (weekStats.none { it.attempts > 0 || it.activeStudents > 0 }) {
+            Text(stringResource(Res.string.admin_pilot_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } else {
+            Row(Modifier.fillMaxWidth()) {
+                Text(stringResource(Res.string.admin_pilot_col_week), Modifier.weight(1.2f), fontWeight = FontWeight.SemiBold)
+                Text(stringResource(Res.string.admin_pilot_col_active), Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
+                Text(stringResource(Res.string.admin_pilot_col_done), Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
+                Text(stringResource(Res.string.admin_pilot_col_rate), Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
+            }
+            weekStats.take(8).forEach { w ->
+                Row(Modifier.fillMaxWidth()) {
+                    Text(w.weekStart, Modifier.weight(1.2f))
+                    Text("${w.activeStudents}/${w.totalStudents}", Modifier.weight(1f))
+                    Text("${w.successes}", Modifier.weight(1f))
+                    Text(if (w.attempts == 0) "–" else "${w.successes * 100 / w.attempts}%", Modifier.weight(1f))
+                }
+            }
+            val hardest = gestureStats.filter { it.attempts >= 5 }.take(5)
+            if (hardest.isNotEmpty()) {
+                Text(stringResource(Res.string.admin_pilot_hardest), fontWeight = FontWeight.SemiBold)
+                hardest.forEach { g ->
+                    Text(stringResource(Res.string.admin_pilot_gesture_line, g.gestureId, (g.successRate * 100).toInt(), g.attempts),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
         }
 
         Text(stringResource(Res.string.admin_school_privacy_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)

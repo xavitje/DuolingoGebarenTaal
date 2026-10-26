@@ -68,7 +68,7 @@ fun ContributionScreen(viewModel: ContributionViewModel, onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             when (state.step) {
-                ContributionStep.PICK_GESTURE -> GesturePickerStep(state.availableGestures, viewModel, onBack)
+                ContributionStep.PICK_GESTURE -> GesturePickerStep(state.availableGestures, state.contentStatus, viewModel, onBack)
                 ContributionStep.CONSENT -> ConsentStep(state.consentGiven, viewModel)
                 ContributionStep.COUNTDOWN -> CountdownStep(state.countdownSeconds)
                 ContributionStep.RECORDING -> RecordingStep(state.recordingProgress)
@@ -85,9 +85,23 @@ fun ContributionScreen(viewModel: ContributionViewModel, onBack: () -> Unit) {
 @Composable
 private fun GesturePickerStep(
     gestures: List<SignTemplate>,
+    status: Map<String, io.github.xavitje.signcoach.data.remote.PilotApi.ContentStatus>,
     viewModel: ContributionViewModel,
     onBack: () -> Unit,
 ) {
+    if (status.isNotEmpty()) {
+        val ready = status.values.count { it.hasDemoVideo && it.approved >= ContributionViewModel.TARGET_APPROVED }
+        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(stringResource(Res.string.contrib_checklist_summary, ready, status.size), style = MaterialTheme.typography.titleSmall)
+                Text(
+                    stringResource(Res.string.contrib_checklist_rule, ContributionViewModel.TARGET_APPROVED),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        }
+    }
     Text(stringResource(Res.string.contrib_picker_title), style = MaterialTheme.typography.titleMedium)
     Text(
         stringResource(Res.string.contrib_picker_desc),
@@ -102,13 +116,7 @@ private fun GesturePickerStep(
         Text(stringResource(Res.string.contrib_picker_alphabet), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             letters.forEach { template ->
-                FilterChip(
-                    selected = false,
-                    onClick = { viewModel.selectGesture(template.id) },
-                    label = { Text(template.name) },
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                GestureChecklistRow(template, status[template.id]) { viewModel.selectGesture(template.id) }
             }
         }
     }
@@ -118,13 +126,7 @@ private fun GesturePickerStep(
         Text(stringResource(Res.string.contrib_picker_numbers), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             numbers.forEach { template ->
-                FilterChip(
-                    selected = false,
-                    onClick = { viewModel.selectGesture(template.id) },
-                    label = { Text(template.name) },
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                GestureChecklistRow(template, status[template.id]) { viewModel.selectGesture(template.id) }
             }
         }
     }
@@ -134,19 +136,44 @@ private fun GesturePickerStep(
         Text(stringResource(Res.string.contrib_picker_other), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary)
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             others.forEach { template ->
-                FilterChip(
-                    selected = false,
-                    onClick = { viewModel.selectGesture(template.id) },
-                    label = { Text(template.name) },
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                GestureChecklistRow(template, status[template.id]) { viewModel.selectGesture(template.id) }
             }
         }
     }
 
     Spacer(Modifier.height(8.dp))
     OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text(stringResource(Res.string.contrib_back)) }
+}
+
+/** Eén gebaar in de keuzelijst, met de checklist: demovideo, goedgekeurde en wachtende opnames. */
+@Composable
+private fun GestureChecklistRow(
+    template: SignTemplate,
+    status: io.github.xavitje.signcoach.data.remote.PilotApi.ContentStatus?,
+    onClick: () -> Unit,
+) {
+    val done = status != null && status.hasDemoVideo && status.approved >= ContributionViewModel.TARGET_APPROVED
+    Card(onClick = onClick, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp)) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(template.name, style = MaterialTheme.typography.titleSmall)
+                if (status != null) {
+                    Text(
+                        stringResource(
+                            Res.string.contrib_checklist_line,
+                            stringResource(if (status.hasDemoVideo) Res.string.contrib_checklist_video_yes else Res.string.contrib_checklist_video_no),
+                            status.approved,
+                            ContributionViewModel.TARGET_APPROVED,
+                            status.pending,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
+            if (done) Text(stringResource(Res.string.contrib_checklist_done), color = io.github.xavitje.signcoach.ui.theme.Clover, style = MaterialTheme.typography.labelLarge)
+        }
+    }
 }
 
 @Composable

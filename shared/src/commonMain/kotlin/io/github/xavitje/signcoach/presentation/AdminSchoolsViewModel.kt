@@ -20,11 +20,16 @@ data class AdminSchoolsUiState(
     val staff: List<SchoolApi.StaffMember> = emptyList(),
     val isBusy: Boolean = false,
     val message: AdminSchoolsMessage? = null,
+    /** Pilotcijfers van de geopende school (fase 5). */
+    val weekStats: List<io.github.xavitje.signcoach.data.remote.PilotApi.WeekStats> = emptyList(),
+    /** Herkenning per gebaar bij de geopende school, slechtst herkend eerst. */
+    val gestureStats: List<io.github.xavitje.signcoach.data.remote.PilotApi.GestureStats> = emptyList(),
 )
 
 /** Beheerscherm voor scholen, licenties en docenten (alleen admins; de server controleert dat). */
 class AdminSchoolsViewModel(
     private val api: SchoolApi = SchoolApi(),
+    private val pilotApi: io.github.xavitje.signcoach.data.remote.PilotApi = io.github.xavitje.signcoach.data.remote.PilotApi(),
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) {
     private val _state = MutableStateFlow(AdminSchoolsUiState())
@@ -57,8 +62,19 @@ class AdminSchoolsViewModel(
     }
 
     fun openSchool(school: SchoolApi.AdminSchool) {
-        _state.update { it.copy(selected = school, staff = emptyList()) }
+        _state.update { it.copy(selected = school, staff = emptyList(), weekStats = emptyList(), gestureStats = emptyList()) }
         loadStaff()
+        loadStats()
+    }
+
+    private fun loadStats() {
+        val token = token() ?: return
+        val school = _state.value.selected ?: return
+        scope.launch {
+            val weeks = pilotApi.schoolStats(token, school.id).getOrNull().orEmpty()
+            val gestures = pilotApi.gestureStats(token, school.id).getOrNull().orEmpty()
+            _state.update { if (it.selected?.id == school.id) it.copy(weekStats = weeks, gestureStats = gestures) else it }
+        }
     }
 
     fun closeSchool() {

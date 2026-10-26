@@ -26,11 +26,14 @@ data class TeacherUiState(
     val newPins: List<SchoolApi.CreatedStudent>? = null,
     val error: TeacherError? = null,
     val seatsLeft: Int? = null,
+    /** Pilotcijfers van de school, nieuwste week eerst (fase 5). */
+    val weekStats: List<io.github.xavitje.signcoach.data.remote.PilotApi.WeekStats> = emptyList(),
 )
 
 /** Tabblad "Klas" voor docenten en schoolbeheerders. */
 class TeacherViewModel(
     private val api: SchoolApi = SchoolApi(),
+    private val pilotApi: io.github.xavitje.signcoach.data.remote.PilotApi = io.github.xavitje.signcoach.data.remote.PilotApi(),
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) {
     private val _state = MutableStateFlow(TeacherUiState())
@@ -46,11 +49,13 @@ class TeacherViewModel(
             val classes = if (school != null) {
                 api.myClasses(token).getOrNull()?.filter { it.schoolId == school.schoolId }
             } else emptyList()
+            val stats = if (school != null) pilotApi.schoolStats(token, school.schoolId).getOrNull().orEmpty() else emptyList()
             _state.update {
                 it.copy(
                     isLoading = false,
                     school = school,
                     classes = classes ?: emptyList(),
+                    weekStats = stats,
                     error = if (classes == null) TeacherError.NETWORK else null,
                 )
             }
@@ -132,6 +137,19 @@ class TeacherViewModel(
             api.removeStudent(token, schoolClass.id, student.userId)
                 .onSuccess { refreshStudents() }
                 .onFailure { e -> _state.update { it.copy(isBusy = false).withError(e) } }
+        }
+    }
+
+    /** Camera aan/uit voor één leerling (bv. als ouders geen camera willen). Zonder camera
+     * oefent de leerling met de zelfcheck. */
+    fun setCamera(student: SchoolApi.StudentProgress, allowed: Boolean) {
+        val token = token() ?: return
+        val schoolClass = _state.value.selectedClass ?: return
+        // Direct tonen; bij een fout zet refreshStudents het terug.
+        _state.update { s -> s.copy(students = s.students.map { if (it.userId == student.userId) it.copy(cameraAllowed = allowed) else it }) }
+        scope.launch {
+            api.setStudentCamera(token, schoolClass.id, student.userId, allowed)
+                .onFailure { e -> _state.update { it.withError(e) }; refreshStudents() }
         }
     }
 

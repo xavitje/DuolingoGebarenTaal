@@ -27,6 +27,15 @@ expect object SessionStore {
      * inlogstatus, zodat de keuze ook vóór/zonder account werkt (zie ChooseSignLanguageScreen). */
     fun isOnboardingComplete(): Boolean
     fun setOnboardingComplete(complete: Boolean)
+
+    /** Laatst gebruikte klascode van een leerling op dit apparaat. Blijft staan na uitloggen,
+     * zodat de volgende leerling op een gedeelde tablet meteen zijn naam kan kiezen. */
+    fun getLastClassCode(): String?
+    fun setLastClassCode(code: String?)
+
+    /** Moment (epoch-ms) waarop de app naar de achtergrond ging; 0 = staat op de voorgrond. */
+    fun getBackgroundedAt(): Long
+    fun setBackgroundedAt(millis: Long)
 }
 
 data class StoredSession(

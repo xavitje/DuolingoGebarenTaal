@@ -132,6 +132,8 @@ class LearnViewModel(
         }.getOrNull()
         syncManager.triggerSyncNow()
         applyProgress()
+        // Pilotmeting: telt als oefendag (niet als herkenningspoging). Best-effort.
+        scope.launch { runCatching { io.github.xavitje.signcoach.data.remote.PilotApi().markPracticeDay(session.accessToken) } }
         return xp
     }
 }

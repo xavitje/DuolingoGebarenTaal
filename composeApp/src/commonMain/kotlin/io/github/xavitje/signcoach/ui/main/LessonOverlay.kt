@@ -33,6 +33,8 @@ fun LessonOverlay(
     gesture: CurriculumGesture?,
     coachViewModel: CoachViewModel?,
     learnViewModel: LearnViewModel,
+    /** False = deze leerling oefent zonder camera (ingesteld door de docent): altijd de zelfcheck. */
+    useCamera: Boolean = true,
     onBack: () -> Unit,
 ) {
     var showingDemo by remember(gesture?.id) { mutableStateOf(true) }
@@ -55,7 +57,7 @@ fun LessonOverlay(
                 onStartPractice = { showingDemo = false },
                 onClose = onBack,
             )
-            gesture.hasTemplate -> if (coachViewModel != null) {
+            gesture.hasTemplate && useCamera -> if (coachViewModel != null) {
                 CoachScreen(
                     viewModel = coachViewModel,
                     onBack = onBack,

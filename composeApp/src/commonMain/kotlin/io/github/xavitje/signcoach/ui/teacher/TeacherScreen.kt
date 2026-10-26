@@ -33,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -135,6 +136,7 @@ fun TeacherScreen(viewModel: TeacherViewModel) {
                         item {
                             Text(school.schoolName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         }
+                        state.weekStats.firstOrNull()?.let { week -> item { WeekStatsCard(week) } }
                         if (state.classes.isEmpty()) {
                             item { Text(stringResource(Res.string.teacher_no_classes), color = MaterialTheme.colorScheme.onSurfaceVariant) }
                         }
@@ -192,6 +194,7 @@ fun TeacherScreen(viewModel: TeacherViewModel) {
                                 student = student,
                                 onResetPin = { viewModel.resetPin(student) },
                                 onRemove = { confirmRemove = student },
+                                onCameraChange = { allowed -> viewModel.setCamera(student, allowed) },
                             )
                         }
                     }
@@ -278,7 +281,23 @@ fun TeacherScreen(viewModel: TeacherViewModel) {
 }
 
 @Composable
-private fun StudentRow(student: SchoolApi.StudentProgress, onResetPin: () -> Unit, onRemove: () -> Unit) {
+private fun WeekStatsCard(week: io.github.xavitje.signcoach.data.remote.PilotApi.WeekStats) {
+    Card(shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(stringResource(Res.string.teacher_week_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(stringResource(Res.string.teacher_week_active, week.activeStudents, week.totalStudents))
+            Text(stringResource(Res.string.teacher_week_done, week.successes), color = Clover)
+        }
+    }
+}
+
+@Composable
+private fun StudentRow(
+    student: SchoolApi.StudentProgress,
+    onResetPin: () -> Unit,
+    onRemove: () -> Unit,
+    onCameraChange: (Boolean) -> Unit,
+) {
     Card(shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(start = 18.dp, end = 8.dp, top = 14.dp, bottom = 4.dp)) {
             Text(student.firstName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -293,6 +312,17 @@ private fun StudentRow(student: SchoolApi.StudentProgress, onResetPin: () -> Uni
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall,
             )
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(top = 6.dp, end = 10.dp)) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(Res.string.teacher_camera), style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        stringResource(if (student.cameraAllowed) Res.string.teacher_camera_on else Res.string.teacher_camera_off),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                Switch(checked = student.cameraAllowed, onCheckedChange = onCameraChange)
+            }
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                 TextButton(onClick = onResetPin) { Text(stringResource(Res.string.teacher_reset_pin)) }
                 TextButton(onClick = onRemove) { Text(stringResource(Res.string.teacher_remove_student), color = MaterialTheme.colorScheme.error) }

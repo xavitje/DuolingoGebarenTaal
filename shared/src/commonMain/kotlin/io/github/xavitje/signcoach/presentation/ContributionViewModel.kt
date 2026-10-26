@@ -37,6 +37,8 @@ data class ContributionUiState(
     /** Alleen bij [ContributionStep.REVIEW]: een beeld uit het midden van de opname, zodat de
      * vakman kan zien of het gebaar goed in beeld stond voordat hij het verstuurt. */
     val previewImage: ImageBitmap? = null,
+    /** Content-checklist per gebaar-id: demovideo en aantal opnames (fase 5). Leeg = niet geladen. */
+    val contentStatus: Map<String, io.github.xavitje.signcoach.data.remote.PilotApi.ContentStatus> = emptyMap(),
     val error: io.github.xavitje.signcoach.domain.AppError? = null,
 )
 
@@ -49,6 +51,7 @@ class ContributionViewModel(
      * ongeluk als NGT-content in de database belandt. */
     private val signLanguage: String = SessionStore.getSignLanguage(),
     private val authApi: SupabaseAuthApi = SupabaseAuthApi(),
+    private val pilotApi: io.github.xavitje.signcoach.data.remote.PilotApi = io.github.xavitje.signcoach.data.remote.PilotApi(),
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) {
     private val _state = MutableStateFlow(ContributionUiState())
@@ -57,6 +60,17 @@ class ContributionViewModel(
 
     fun setAvailableGestures(gestures: List<SignTemplate>) {
         _state.update { it.copy(availableGestures = gestures) }
+        loadContentStatus()
+    }
+
+    /** Haalt per gebaar op hoeveel opnames er zijn en of er een demovideo is. */
+    fun loadContentStatus() {
+        scope.launch {
+            val token = freshAccessToken() ?: return@launch
+            pilotApi.contentStatus(token, signLanguage).onSuccess { list ->
+                _state.update { it.copy(contentStatus = list.associateBy { s -> s.gestureId }) }
+            }
+        }
     }
 
     fun selectGesture(id: String) {
@@ -196,6 +210,7 @@ class ContributionViewModel(
         )
         result.onSuccess {
             pendingClip = null
+            loadContentStatus()
             _state.update { it.copy(step = ContributionStep.SUCCESS, previewImage = null) }
         }.onFailure { e ->
             _state.update {
@@ -231,9 +246,11 @@ class ContributionViewModel(
         return (1..length).map { chars.random() }.joinToString("")
     }
 
-    private companion object {
+    companion object {
         const val COUNTDOWN_SECONDS = 3
         const val RECORD_DURATION_MS = 2500L
+        /** Streefaantal goedgekeurde opnames per gebaar (PRODUCT_PLAN: 6 tot 10, meerdere gebaarders). */
+        const val TARGET_APPROVED = 6
         /** Minimaal aantal frames met een herkende hand (bij ~15-30 fps zijn er 35-75 frames). */
         const val MIN_DETECTED_POSES = 10
     }

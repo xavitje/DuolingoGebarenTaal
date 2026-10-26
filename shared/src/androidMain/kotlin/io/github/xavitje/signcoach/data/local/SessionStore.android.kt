@@ -63,4 +63,16 @@ actual object SessionStore {
     actual fun setOnboardingComplete(complete: Boolean) {
         settings.putBoolean(KEY_ONBOARDING_COMPLETE, complete)
     }
+
+    actual fun getLastClassCode(): String? = settings.getStringOrNull("last_class_code")
+
+    actual fun setLastClassCode(code: String?) {
+        if (code == null) settings.remove("last_class_code") else settings.putString("last_class_code", code)
+    }
+
+    actual fun getBackgroundedAt(): Long = settings.getLong("backgrounded_at", 0L)
+
+    actual fun setBackgroundedAt(millis: Long) {
+        settings.putLong("backgrounded_at", millis)
+    }
 }

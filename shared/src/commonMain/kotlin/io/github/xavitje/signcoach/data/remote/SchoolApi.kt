@@ -63,6 +63,8 @@ class SchoolApi(
         @SerialName("license_end") val licenseEnd: String,
         @SerialName("license_active") val licenseActive: Boolean,
         @SerialName("is_student") val isStudent: Boolean,
+        /** Mag deze leerling met de camera oefenen? De docent kan dit per leerling uitzetten. */
+        @SerialName("camera_allowed") val cameraAllowed: Boolean = true,
     )
 
     @Serializable
@@ -81,6 +83,7 @@ class SchoolApi(
         @SerialName("total_xp") val totalXp: Int = 0,
         @SerialName("current_streak") val currentStreak: Int = 0,
         @SerialName("last_practice_date") val lastPracticeDate: String? = null,
+        @SerialName("camera_allowed") val cameraAllowed: Boolean = true,
     )
 
     @Serializable
@@ -146,6 +149,12 @@ class SchoolApi(
         @SerialName("p_email") val email: String,
         @SerialName("p_staff_role") val staffRole: String,
     )
+    @Serializable private data class CameraArgs(
+        @SerialName("p_class_id") val classId: String,
+        @SerialName("p_user_id") val userId: String,
+        @SerialName("p_allowed") val allowed: Boolean,
+    )
+
     @Serializable private data class SchoolIdArgs(@SerialName("p_school_id") val schoolId: String)
 
     @Serializable private data class RemoveStaffArgs(
@@ -232,6 +241,15 @@ class SchoolApi(
             auth(accessToken)
             contentType(ContentType.Application.Json)
             setBody(StudentsAction(action = "remove", classId = classId, userId = userId))
+        }
+        Unit
+    }
+
+    suspend fun setStudentCamera(accessToken: String, classId: String, userId: String, allowed: Boolean): Result<Unit> = safeApiCall {
+        client.post("$baseUrl/rest/v1/rpc/set_student_camera") {
+            auth(accessToken)
+            contentType(ContentType.Application.Json)
+            setBody(CameraArgs(classId, userId, allowed))
         }
         Unit
     }

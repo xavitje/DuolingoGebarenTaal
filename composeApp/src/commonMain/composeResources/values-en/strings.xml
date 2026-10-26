@@ -203,6 +203,12 @@
     <string name="contrib_review_desc">This is a frame from your recording. Is your hand fully and sharply in view, with the right handshape? Then send it to the reviewer. If not, just record it again.</string>
     <string name="contrib_review_retake">Record again</string>
     <string name="contrib_review_send">Send</string>
+    <string name="contrib_checklist_summary">%1$d of %2$d signs complete</string>
+    <string name="contrib_checklist_rule">Complete = a demo video and at least %1$d approved recordings, ideally from different people.</string>
+    <string name="contrib_checklist_line">Video: %1$s · approved %2$d/%3$d · awaiting review: %4$d</string>
+    <string name="contrib_checklist_video_yes">yes</string>
+    <string name="contrib_checklist_video_no">no</string>
+    <string name="contrib_checklist_done">Complete</string>
     <string name="contrib_uploading">Sending contribution…</string>
     
     <string name="contrib_success_title">Thanks for your contribution!</string>
@@ -354,6 +360,20 @@
     <string name="admin_school_purge">Delete student data</string>
     <string name="admin_school_purge_confirm_title">Delete everything for this school?</string>
     <string name="admin_school_purge_confirm_text">All student accounts, progress and classes of %1$s will be permanently deleted and teachers lose access. The school and its licence details remain. This cannot be undone.</string>
+    <string name="admin_pilot_title">Pilot figures</string>
+    <string name="admin_pilot_empty">No practice measured at this school yet.</string>
+    <string name="admin_pilot_col_week">Week of</string>
+    <string name="admin_pilot_col_active">Active</string>
+    <string name="admin_pilot_col_done">Done</string>
+    <string name="admin_pilot_col_rate">Recognised</string>
+    <string name="admin_pilot_hardest">Hardest to recognise (last 8 weeks)</string>
+    <string name="admin_pilot_gesture_line">%1$s: %2$d%% success over %3$d attempts</string>
+    <string name="teacher_week_title">This week</string>
+    <string name="teacher_week_active">%1$d of %2$d students practised</string>
+    <string name="teacher_week_done">%1$d signs completed with the camera</string>
+    <string name="teacher_camera">Practise with camera</string>
+    <string name="teacher_camera_on">On: the app watches and gives feedback</string>
+    <string name="teacher_camera_off">Off: the student watches the examples and checks off themselves</string>
     <string name="admin_msg_error">Something went wrong. Check the input and try again.</string>
     <string name="admin_school_invalid">Enter a name, a number of seats and a valid date (YYYY-MM-DD).</string>
     <string name="register_confirm_title">Check your e-mail</string>

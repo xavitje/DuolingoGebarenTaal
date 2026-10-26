@@ -79,6 +79,8 @@ fun MainScreen(
         value = if (token == null) null else io.github.xavitje.signcoach.data.remote.SchoolApi()
             .mySchool(token).getOrNull()?.firstOrNull()
     }
+    // De docent kan de camera per leerling uitzetten; dan oefent de leerling met de zelfcheck.
+    val cameraAllowed = mySchool?.cameraAllowed ?: true
     val teacherViewModel = remember { io.github.xavitje.signcoach.presentation.TeacherViewModel() }
 
     // LearnViewModel leeft op MainScreen-niveau zodat het leerpad bewaard blijft bij tab-wissels.
@@ -104,13 +106,13 @@ fun MainScreen(
     }
 
     // Maak/vernieuw CoachViewModel wanneer een les geselecteerd wordt.
-    LaunchedEffect(learnState.selectedGesture) {
+    LaunchedEffect(learnState.selectedGesture, cameraAllowed) {
         val gesture = learnState.selectedGesture
         // Altijd eerst de vorige oefening (camera/tracker) stoppen: met "Volgend gebaar" gaat
         // de leerling van les naar les zonder tussendoor de overlay te sluiten.
         coachViewModel?.clear()
         coachViewModel = null
-        if (gesture != null && gesture.hasTemplate) {
+        if (gesture != null && gesture.hasTemplate && cameraAllowed) {
             // Filter de templates op het geselecteerde gebaar zodat CoachScreen alleen
             // die ene les toont.
             val filtered = sharedTemplates.filter { it.id == gesture.id }
@@ -238,6 +240,7 @@ fun MainScreen(
                     gesture = learnState.selectedGesture,
                     coachViewModel = coachViewModel,
                     learnViewModel = learnViewModel,
+                    useCamera = cameraAllowed,
                     onBack = { learnViewModel.clearSelection() },
                 )
             }

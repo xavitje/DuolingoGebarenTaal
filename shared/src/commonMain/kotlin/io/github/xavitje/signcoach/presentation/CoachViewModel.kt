@@ -52,6 +52,10 @@ class CoachViewModel(
     private var statusJob: Job? = null
     private var practiceJob: Job? = null
     private var highScoreSinceMs: Long? = null
+    private val pilotApi = io.github.xavitje.signcoach.data.remote.PilotApi()
+    /** Pilotmeting: er is een hand gezien in deze poging, en is de uitkomst al gemeld? */
+    private var attemptStarted = false
+    private var attemptLogged = false
 
     fun dispatch(intent: CoachIntent) {
         AppLogger.d("SignCoach", "Dispatching intent $intent (current status=${state.value.status})")
@@ -77,6 +81,8 @@ class CoachViewModel(
         val selected = selectedTemplate() ?: return
         AppLogger.d("SignCoach", "startPractice called for template ${selected.id}")
         highScoreSinceMs = null
+        attemptStarted = false
+        attemptLogged = false
         poseJob?.cancel()
         statusJob?.cancel()
         practiceJob?.cancel()
@@ -111,6 +117,7 @@ class CoachViewModel(
                     }
                     .collect { pose ->
                         if (!pose.isValid()) return@collect
+                        attemptStarted = true
                         val currentSelected = selectedTemplate() ?: return@collect
                         _state.update { current ->
                             val withPose = CoachReducer.poseReceived(current, pose)
@@ -157,7 +164,8 @@ class CoachViewModel(
         AppLogger.d("SignCoach", "completePractice called with score $score")
         highScoreSinceMs = null
         val selected = selectedTemplate() ?: return
-        
+        logAttempt(selected.id, success = true)
+
         // Stop de tracker (wordt al deels afgehandeld door Reducer, maar voor de zekerheid)
         poseJob?.cancel()
         statusJob?.cancel()
@@ -203,8 +211,17 @@ class CoachViewModel(
         it.id == state.value.selectedTemplateId
     }
 
+    /** Anonieme pilotmeting (fase 5): één keer per poging, gelukt of opgegeven. Best-effort. */
+    private fun logAttempt(gestureId: String, success: Boolean) {
+        if (attemptLogged || (!success && !attemptStarted)) return
+        attemptLogged = true
+        val token = SessionStore.load()?.accessToken ?: return
+        scope.launch { runCatching { pilotApi.logAttempt(token, gestureId, success) } }
+    }
+
     fun clear() {
         AppLogger.d("SignCoach", "ViewModel clear called")
+        selectedTemplate()?.let { logAttempt(it.id, success = false) }
         highScoreSinceMs = null
         poseJob?.cancel()
         statusJob?.cancel()
