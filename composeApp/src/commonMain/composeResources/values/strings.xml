@@ -199,6 +199,10 @@
     <string name="contrib_recording_title">Opnemen…</string>
     <string name="contrib_recording_desc">Nu opnemen — houd de handvorm stil tot de balk hieronder vol is. Niet meer bewegen of van vorm veranderen tijdens het opnemen.</string>
     
+    <string name="contrib_review_title">Klopt je opname?</string>
+    <string name="contrib_review_desc">Dit is een beeld uit je opname. Staat je hand volledig en scherp in beeld, en is de handvorm goed? Verstuur hem dan naar de beoordelaar. Anders neem je hem gewoon opnieuw op.</string>
+    <string name="contrib_review_retake">Opnieuw opnemen</string>
+    <string name="contrib_review_send">Versturen</string>
     <string name="contrib_uploading">Bijdrage versturen…</string>
     
     <string name="contrib_success_title">Bedankt voor je bijdrage!</string>

@@ -23,11 +23,31 @@ class GestureScorerTest {
     fun smallAndLargeDeviationsProduceOrderedScores() {
         val template = staticTemplate()
         val small = pose(transform = { index, point -> if (index == 8) point.copy(x = point.x + 0.02f) else point })
-        val large = pose(transform = { index, point -> if (index > 4) point.copy(x = point.x + 0.4f) else point })
+        // Grote afwijking = andere handvorm: vingertoppen terug naar hun knokkel (vuist i.p.v. gestrekt).
+        // Een pure verschuiving van alle vingers telt sinds de curl-meting minder zwaar mee
+        // (vingerstand blijft gelijk), zie shiftedFingersScoreLowerThanSmallDeviation.
+        val reference = pose()
+        val large = pose(transform = { index, point ->
+            if (index > 4 && index % 4 == 0) {
+                val mcp = reference.landmarks[index - 3]
+                point.copy(x = mcp.x + 0.005f, y = mcp.y + 0.005f, z = mcp.z)
+            } else {
+                point
+            }
+        })
         val smallResult = staticScorer.score(listOf(small), template)
         val largeResult = staticScorer.score(listOf(large), template)
+        assertTrue(smallResult.isCorrect)
         assertTrue(smallResult.score > largeResult.score)
         assertFalse(largeResult.isCorrect)
+    }
+
+    @Test
+    fun shiftedFingersScoreLowerThanSmallDeviation() {
+        val template = staticTemplate()
+        val small = pose(transform = { index, point -> if (index == 8) point.copy(x = point.x + 0.02f) else point })
+        val shifted = pose(transform = { index, point -> if (index > 4) point.copy(x = point.x + 0.4f) else point })
+        assertTrue(staticScorer.score(listOf(small), template).score > staticScorer.score(listOf(shifted), template).score)
     }
 
     @Test

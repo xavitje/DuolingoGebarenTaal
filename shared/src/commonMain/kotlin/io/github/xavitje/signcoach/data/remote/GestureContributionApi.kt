@@ -90,10 +90,12 @@ class GestureContributionApi(
      * status server-side altijd op 'pending', ongeacht wat hier wordt meegestuurd — een
      * bijdrage wordt dus nooit direct live voor andere gebruikers.
      */
-    suspend fun submitSample(sample: NewSampleDto): Result<Unit> = safeApiCall {
+    suspend fun submitSample(accessToken: String, sample: NewSampleDto): Result<Unit> = safeApiCall {
         val response: HttpResponse = client.post("$baseUrl/rest/v1/gesture_samples") {
             header("apikey", anonKey)
-            header("Authorization", "Bearer $anonKey")
+            // Sinds fase 2 mag alleen een ingelogde vakman/admin bijdragen (RLS: can_contribute()),
+            // dus hier het token van de gebruiker, niet de anon-key.
+            header("Authorization", "Bearer $accessToken")
             contentType(ContentType.Application.Json)
             setBody(sample)
         }
@@ -112,10 +114,10 @@ class GestureContributionApi(
      * te overschrijven. [randomId] in ContributionViewModel garandeert al een uniek pad per
      * opname, dus upsert is hier nooit nodig.
      */
-    suspend fun uploadReviewClip(path: String, bytes: ByteArray, contentType: String): Result<Unit> = safeApiCall {
+    suspend fun uploadReviewClip(accessToken: String, path: String, bytes: ByteArray, contentType: String): Result<Unit> = safeApiCall {
         val response: HttpResponse = client.post("$baseUrl/storage/v1/object/gesture-videos/$path") {
             header("apikey", anonKey)
-            header("Authorization", "Bearer $anonKey")
+            header("Authorization", "Bearer $accessToken")
             contentType(ContentType.parse(contentType))
             setBody(bytes)
             // Video-uploads mogen langer duren dan de standaard 15s (grotere payload, trager

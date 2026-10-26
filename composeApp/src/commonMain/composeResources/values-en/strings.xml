@@ -199,6 +199,10 @@
     <string name="contrib_recording_title">Recording…</string>
     <string name="contrib_recording_desc">Recording now — hold the hand shape still until the bar below is full. Do not move or change shape while recording.</string>
     
+    <string name="contrib_review_title">Is your recording right?</string>
+    <string name="contrib_review_desc">This is a frame from your recording. Is your hand fully and sharply in view, with the right handshape? Then send it to the reviewer. If not, just record it again.</string>
+    <string name="contrib_review_retake">Record again</string>
+    <string name="contrib_review_send">Send</string>
     <string name="contrib_uploading">Sending contribution…</string>
     
     <string name="contrib_success_title">Thanks for your contribution!</string>

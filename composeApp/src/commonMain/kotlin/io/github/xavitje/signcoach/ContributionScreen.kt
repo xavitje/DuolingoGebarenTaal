@@ -32,6 +32,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import io.github.xavitje.signcoach.data.model.SignTemplate
 import io.github.xavitje.signcoach.platform.CameraPreview
@@ -69,6 +72,7 @@ fun ContributionScreen(viewModel: ContributionViewModel, onBack: () -> Unit) {
                 ContributionStep.CONSENT -> ConsentStep(state.consentGiven, viewModel)
                 ContributionStep.COUNTDOWN -> CountdownStep(state.countdownSeconds)
                 ContributionStep.RECORDING -> RecordingStep(state.recordingProgress)
+                ContributionStep.REVIEW -> ReviewStep(state.previewImage, viewModel)
                 ContributionStep.UPLOADING -> UploadingStep()
                 ContributionStep.SUCCESS -> SuccessStep(viewModel, onBack)
                 ContributionStep.ERROR -> ErrorStep(state.error, viewModel)
@@ -209,6 +213,39 @@ private fun RecordingStep(progress: Float) {
         }
     }
     LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
+}
+
+@Composable
+private fun ReviewStep(preview: ImageBitmap?, viewModel: ContributionViewModel) {
+    Text(stringResource(Res.string.contrib_review_title), style = MaterialTheme.typography.titleMedium)
+    Text(
+        stringResource(Res.string.contrib_review_desc),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    if (preview != null) {
+        Surface(
+            modifier = Modifier.fillMaxWidth().height(360.dp),
+            shape = MaterialTheme.shapes.large,
+            tonalElevation = 2.dp,
+        ) {
+            Box(Modifier.background(Color.Black), contentAlignment = Alignment.Center) {
+                Image(
+                    bitmap = preview,
+                    contentDescription = stringResource(Res.string.contrib_review_title),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+    }
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        OutlinedButton(onClick = { viewModel.retake() }, modifier = Modifier.weight(1f).height(52.dp)) {
+            Text(stringResource(Res.string.contrib_review_retake))
+        }
+        Button(onClick = { viewModel.confirmUpload() }, modifier = Modifier.weight(1f).height(52.dp)) {
+            Text(stringResource(Res.string.contrib_review_send))
+        }
+    }
 }
 
 @Composable
