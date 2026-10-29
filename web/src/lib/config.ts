@@ -13,5 +13,5 @@ export const STUDENT_IDLE_LIMIT_MS = 10 * 60 * 1000;
 export const isSchoolStudentEmail = (email: string | null | undefined) =>
   !!email && email.toLowerCase().endsWith(`@${STUDENT_EMAIL_DOMAIN}`);
 
-/** De website (privacy-documenten). Wordt https://signcoach.nl zodra het domein er is. */
-export const WEBSITE_URL = 'https://signcoachweb.rafi-elidrissi.workers.dev';
+/** De website (privacy-documenten). */
+export const WEBSITE_URL = 'https://signcoach.nl';

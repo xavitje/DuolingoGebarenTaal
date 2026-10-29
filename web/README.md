@@ -59,4 +59,4 @@ Geen runtime-variabelen nodig: de Supabase-URL en de publieke sleutel staan in `
 erachter (bijvoorbeeld `https://duolingogebarentaal.<jouw-subdomein>.workers.dev/**`). Anders komen de
 links uit "wachtwoord vergeten" en de bevestigingsmail niet terug in de web-app.
 
-Komt er later een eigen domein (bijvoorbeeld `app.signcoach.nl`), voeg dat hier dan ook toe.
+Met het eigen domein: voeg ook `https://app.signcoach.nl/**` toe en zet de **Site URL** op `https://app.signcoach.nl`.
