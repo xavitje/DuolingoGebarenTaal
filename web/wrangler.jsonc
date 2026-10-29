@@ -2,7 +2,7 @@
 // Instellingen in Cloudflare: Root directory: web · Build command: npm run build · Deploy command: npx wrangler deploy
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "signcoach-app",
+  "name": "duolingogebarentaal",
   "compatibility_date": "2025-09-01",
   "assets": {
     "directory": "./dist",

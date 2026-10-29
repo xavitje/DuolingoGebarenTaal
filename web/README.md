@@ -56,7 +56,7 @@ Geen runtime-variabelen nodig: de Supabase-URL en de publieke sleutel staan in `
 ### Supabase: één keer instellen
 
 **Authentication → URL Configuration → Redirect URLs**: voeg het adres van de web-app toe, met `/**`
-erachter (bijvoorbeeld `https://signcoach-app.<jouw-subdomein>.workers.dev/**`). Anders komen de
+erachter (bijvoorbeeld `https://duolingogebarentaal.<jouw-subdomein>.workers.dev/**`). Anders komen de
 links uit "wachtwoord vergeten" en de bevestigingsmail niet terug in de web-app.
 
 Komt er later een eigen domein (bijvoorbeeld `app.signcoach.nl`), voeg dat hier dan ook toe.

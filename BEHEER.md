@@ -328,7 +328,7 @@ Edge functions (Supabase → Edge Functions):
 De map `web/` is de browserversie: voor leerlingen, docenten en vakmensen, met dezelfde accounts en
 voortgang als de Android-app. Uitleg en commando's staan in `web/README.md`.
 
-- **Online**: een tweede Cloudflare Worker (`signcoach-app`) naast de website. Root directory `web`,
+- **Online**: een tweede Cloudflare Worker (`duolingogebarentaal`) naast de website. Root directory `web`,
   build command `npm run build`, deploy command `npx wrangler deploy`, build-variabele
   `NODE_VERSION` = `22`.
 - **Supabase, één keer**: Authentication → URL Configuration → Redirect URLs: het adres van de
