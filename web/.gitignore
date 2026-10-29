@@ -1,0 +1,7 @@
+node_modules
+dist
+.wrangler
+# Worden bij elke build gekopieerd door scripts/prepare-assets.mjs
+public/mediapipe
+public/templates.json
+*.png

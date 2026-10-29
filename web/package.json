@@ -1,0 +1,27 @@
+{
+  "name": "signcoach-webapp",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "prepare-assets": "node scripts/prepare-assets.mjs",
+    "dev": "npm run prepare-assets && vite",
+    "build": "npm run prepare-assets && tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fontsource/baloo-2": "5.3.0",
+    "@fontsource/plus-jakarta-sans": "5.3.0",
+    "@mediapipe/tasks-vision": "0.10.35",
+    "@supabase/supabase-js": "2.117.3",
+    "preact": "10.29.7"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "2.10.6",
+    "typescript": "5.9.3",
+    "vite": "6.4.4",
+    "vitest": "3.2.7",
+    "wrangler": "4.149.0"
+  }
+}

@@ -65,9 +65,11 @@ Deno.serve(async (req) => {
   // Goedgekeurd: kopiëren naar de openbare bucket en bij het gebaar zetten.
   const { data: file, error: dlError } = await admin.storage.from("demo-review").download(video.storage_path);
   if (dlError || !file) return json({ error: "server", detail: dlError?.message ?? "download" }, 500);
-  const publicPath = `${video.sign_language}/${video.gesture_id}/${video.id}.mp4`;
+  // Opnames uit de Android-app en de meeste browsers zijn MP4; Firefox neemt WebM op.
+  const ext = String(video.storage_path).toLowerCase().endsWith(".webm") ? "webm" : "mp4";
+  const publicPath = `${video.sign_language}/${video.gesture_id}/${video.id}.${ext}`;
   const { error: upError } = await admin.storage.from("demo-videos").upload(publicPath, file, {
-    contentType: "video/mp4",
+    contentType: ext === "webm" ? "video/webm" : "video/mp4",
     upsert: true,
   });
   if (upError) return json({ error: "server", detail: upError.message }, 500);

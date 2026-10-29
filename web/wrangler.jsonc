@@ -1,0 +1,13 @@
+// Cloudflare Worker met alleen statische bestanden: de web-app (dist/).
+// Instellingen in Cloudflare: Root directory: web · Build command: npm run build · Deploy command: npx wrangler deploy
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "signcoach-app",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "./dist",
+    // Elke onbekende route (bv. /les/letter_a) krijgt index.html; de app regelt de routes zelf.
+    "not_found_handling": "single-page-application"
+  },
+  "observability": { "enabled": true }
+}

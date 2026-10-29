@@ -3,7 +3,7 @@
 Spiekbriefje voor het dagelijks beheer: rollen toewijzen, content toevoegen, bouwen en testen.
 Alle SQL hieronder plak je in Supabase onder **SQL Editor** en voer je uit met **Run**.
 
-Bijgewerkt: 25 oktober 2026 (na fase 0 t/m 3 van het implementatieplan).
+Bijgewerkt: 29 oktober 2026 (web-app toegevoegd).
 
 ---
 
@@ -218,7 +218,7 @@ app met camera-herkenning.
 
 1. Een vakman kiest bij **Draag een gebaar bij** een gebaar en dan **Demovideo voor leerlingen**.
    Hij geeft toestemming (de video wordt aan leerlingen getoond), neemt 5 seconden op, kijkt terug
-   en verstuurt. Alleen op Android.
+   en verstuurt. Op Android of in de web-app.
 2. De video komt in een wachtrij (privé-bucket `demo-review`). Leerlingen zien hem nog niet.
 3. Een **andere** vakman (of jij als admin) opent **Demovideo's van collega's beoordelen**, bekijkt
    de video en kiest **Goedkeuren** of **Afkeuren** (met opmerking). Je eigen video's kun je niet
@@ -310,7 +310,7 @@ Uitgevoerd tot nu toe:
 | `20261025230000_fase3_fix_rollen.sql` | Docentrol klopt ook zonder profielrij (na fase 3 uitvoeren) | Ja |
 | `20261026190000_fase4_privacy.sql` | Gegevens verwijderen bij account/licentie-einde, anonieme crashrapporten | Ja, 26-10-2026 |
 | `20261026210000_fase5_pilot.sql` | Camera per leerling, pilotmetingen, content-checklist, crashrapporten 12 maanden | Ja |
-| `20261026230000_pincodes_feedback_demovideos.sql` | Pincodes zichtbaar, feedbackformulier, demovideo-wachtrij | Nog niet |
+| `20261026230000_pincodes_feedback_demovideos.sql` | Pincodes zichtbaar, feedbackformulier, demovideo-wachtrij | Ja |
 
 Edge functions (Supabase → Edge Functions):
 
@@ -319,13 +319,34 @@ Edge functions (Supabase → Edge Functions):
 | `send-streak-reminders` | Dagelijkse herinnering | (bestond al) |
 | `school-students` | Leerlingen aanmaken, pincode resetten, verwijderen | Ja |
 | `student-login` | Inloggen met klascode + naam + pincode | Ja |
-| `review-demo-video` | Demovideo goed- of afkeuren (door een andere vakman) | Nog niet |
+| `review-demo-video` | Demovideo goed- of afkeuren (door een andere vakman) | Ja. Op 29-10-2026 aangepast voor WebM-video's uit de web-app: opnieuw deployen |
 
 ---
 
-## 6. Bekende open punten
+## 6. De web-app (browser)
 
-- **iOS** is geschreven maar nooit gebouwd of getest (zie `IOS_SETUP.md`). Veel scholen gebruiken iPads.
+De map `web/` is de browserversie: voor leerlingen, docenten en vakmensen, met dezelfde accounts en
+voortgang als de Android-app. Uitleg en commando's staan in `web/README.md`.
+
+- **Online**: een tweede Cloudflare Worker (`signcoach-app`) naast de website. Root directory `web`,
+  build command `npm run build`, deploy command `npx wrangler deploy`, build-variabele
+  `NODE_VERSION` = `22`.
+- **Supabase, één keer**: Authentication → URL Configuration → Redirect URLs: het adres van de
+  web-app met `/**` erachter toevoegen. Anders werken "wachtwoord vergeten" en de bevestigingsmail
+  niet vanuit de browser.
+- **Herkenning**: hetzelfde model en dezelfde templates als de app; de scoring is een kopie van de
+  Kotlin-code. Verander je de regels in Kotlin (scorer, herhalingen, leerpad), verander ze dan ook in
+  `web/src/domain/` en draai `npm test`.
+- **Demovideo's uit de browser** zijn meestal MP4. Firefox neemt WebM op; daarvoor is
+  `review-demo-video` aangepast (zie §5).
+- Scholen en licenties beheren (admin) kan alleen in de Android-app.
+
+---
+
+## 7. Bekende open punten
+
+- **iOS** is geschreven maar nooit gebouwd of getest (zie `IOS_SETUP.md`). Veel scholen gebruiken iPads;
+  tot de iOS-app er is, werkt de web-app in Safari op de iPad (nog niet op een echte iPad getest).
 - **Privacydocumenten** voor scholen (verwerkersovereenkomst, privacybijsluiter, beveiligingsbijlage,
   DPIA) moeten nog gemaakt en door een privacyjurist nagekeken worden.
 - **Supabase-regio**: het privacybeleid zegt "EU (Frankfurt)". Controleer dit in Supabase onder
